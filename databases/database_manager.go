@@ -1,7 +1,9 @@
 package databases
 
 import (
+	mysqlConnector "db_meta/databases/mysql"
 	postgresConnector "db_meta/databases/postgres"
+	sqlserverConnector "db_meta/databases/sqlserver"
 	"db_meta/dbstructs"
 	"errors"
 	"fmt"
@@ -37,6 +39,10 @@ func (dbm *DatabaseManager) Connect(dbType, host, port, database, user, password
 	switch dbType {
 	case "postgres":
 		dbm.connector = &postgresConnector.PostgresConnector{}
+	case "mysql":
+		dbm.connector = &mysqlConnector.MySQLConnector{}
+	case "sqlserver":
+		dbm.connector = &sqlserverConnector.SQLServerConnector{}
 	default:
 		return nil, errors.New("unsopported database")
 	}

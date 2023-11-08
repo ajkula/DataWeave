@@ -16,7 +16,7 @@ func (conn PostgresConnector) Connect(host, port, database, user, password strin
 	databaseURL := fmt.Sprintf("host=%s user=%s password=%s database=%s port=%s sslmode=disable", host, user, password, database, port)
 	db, err := gorm.Open(postgres.Open(databaseURL), &gorm.Config{})
 	if err != nil {
-		log.Println("postgres.go:18", err)
+		log.Println("postgres.go:[1]", err)
 		return nil, err
 	}
 	return db, nil
@@ -46,7 +46,7 @@ func (conn PostgresConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableM
 				FROM information_schema.columns
 				WHERE table_name = ?`, tableName).Scan(&columns)
 		if result.Error != nil {
-			log.Println("postgres.go:42", result.Error)
+			log.Println("postgres.go:[2]", result.Error)
 			return nil, result.Error
 		}
 		table.Columns = append(table.Columns, columns...)
@@ -65,7 +65,7 @@ func (conn PostgresConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableM
 				ORDER BY kcu.ordinal_position
 		`, tableName).Rows()
 		if err != nil {
-			log.Println("postgres.go:57", err)
+			log.Println("postgres.go:[3]", err)
 			return nil, err
 		}
 		defer rows.Close()
@@ -73,7 +73,7 @@ func (conn PostgresConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableM
 		for rows.Next() {
 			var pkColumn string
 			if err := rows.Scan(&pkColumn); err != nil {
-				log.Println("postgres.go:72", err)
+				log.Println("postgres.go:[4]", err)
 				return nil, err
 			}
 			primaryKeys = append(primaryKeys, pkColumn)
@@ -88,7 +88,7 @@ func (conn PostgresConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableM
 				FROM pg_constraint 
 				WHERE confrelid = (SELECT oid FROM pg_class WHERE relname = ?)`, table.TableName).Scan(&relationships)
 		if result.Error != nil {
-			log.Println("postgres.go:87", result.Error)
+			log.Println("postgres.go:[5]", result.Error)
 			return nil, result.Error
 		}
 		table.Relationships = relationships
@@ -142,7 +142,7 @@ func (conn PostgresConnector) GetTableNames(db *gorm.DB) ([]string, error) {
 			FROM information_schema.tables
 			WHERE table_schema = 'public'`).Scan(&tableNames)
 	if result.Error != nil {
-		log.Println("postgres.go:28", result.Error)
+		log.Println("postgres.go:[6]", result.Error)
 		return nil, result.Error
 	}
 	return tableNames, nil
