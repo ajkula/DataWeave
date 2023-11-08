@@ -36,12 +36,12 @@ func (conn MySQLConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableMeta
 		// Get columns
 		var columns []*dbstructs.Column
 		result := db.Raw(`
-				SELECT column_name, data_type, is_nullable = 'NO' as not_null,
-				(SELECT count(*) FROM information_schema.statistics
-						WHERE table_name = ? AND non_unique = 0
-						AND column_name = columns.column_name) > 0 as unique
-				FROM information_schema.columns
-				WHERE table_name = ?`, tableName, tableName).Scan(&columns)
+                SELECT column_name, data_type, is_nullable = 'NO' as not_null,
+                (SELECT count(*) FROM information_schema.statistics
+                        WHERE table_name = ? AND non_unique = 0
+                        AND column_name = columns.column_name) > 0 as unique
+                FROM information_schema.columns
+                WHERE table_name = ?`, tableName, tableName).Scan(&columns)
 		if result.Error != nil {
 			log.Println("mysql.go:[2]", result.Error)
 			return nil, result.Error
@@ -51,10 +51,10 @@ func (conn MySQLConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableMeta
 		// Get primary keys
 		var primaryKeys []string
 		rows, err := db.Raw(`
-				SELECT column_name
-				FROM information_schema.columns
-				WHERE table_name = ? AND column_key = 'PRI'
-		`, tableName).Rows()
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = ? AND column_key = 'PRI'
+        `, tableName).Rows()
 		if err != nil {
 			log.Println("mysql.go:[3]", err)
 			return nil, err
@@ -75,9 +75,9 @@ func (conn MySQLConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableMeta
 		// Get relationships
 		var relationships []*dbstructs.RelationshipMetadata
 		result = db.Raw(`
-				SELECT constraint_name, referenced_table_name
-				FROM information_schema.key_column_usage
-				WHERE table_name = ? AND referenced_table_name IS NOT NULL`, tableName).Scan(&relationships)
+                SELECT constraint_name AS conname, referenced_table_name AS confrelid
+                FROM information_schema.key_column_usage
+                WHERE table_name = ? AND referenced_table_name IS NOT NULL`, tableName).Scan(&relationships)
 		if result.Error != nil {
 			log.Println("mysql.go:[5]", result.Error)
 			return nil, result.Error
@@ -100,11 +100,11 @@ func (conn MySQLConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableMeta
 func (conn MySQLConnector) GetIndexes(db *gorm.DB, tableName string) ([]*dbstructs.Index, error) {
 	var indexes []*dbstructs.Index
 	rows, err := db.Raw(`
-			SELECT index_name, GROUP_CONCAT(column_name ORDER BY seq_in_index) AS columns
-			FROM information_schema.statistics
-			WHERE table_name = ? AND table_schema = (SELECT DATABASE())
-			GROUP BY index_name
-	`, tableName).Rows()
+            SELECT index_name, GROUP_CONCAT(column_name ORDER BY seq_in_index) AS columns
+            FROM information_schema.statistics
+            WHERE table_name = ? AND table_schema = (SELECT DATABASE())
+            GROUP BY index_name
+    `, tableName).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -126,9 +126,9 @@ func (conn MySQLConnector) GetIndexes(db *gorm.DB, tableName string) ([]*dbstruc
 func (conn MySQLConnector) GetTableNames(db *gorm.DB) ([]string, error) {
 	var tableNames []string
 	result := db.Raw(`
-			SELECT table_name
-			FROM information_schema.tables
-			WHERE table_schema = (SELECT DATABASE()) AND table_type = 'BASE TABLE'`).Scan(&tableNames)
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = (SELECT DATABASE()) AND table_type = 'BASE TABLE'`).Scan(&tableNames)
 	if result.Error != nil {
 		log.Println("mysql.go:[6]", result.Error)
 		return nil, result.Error

@@ -35,7 +35,8 @@ func (conn SQLServerConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.Table
 		// Get columns
 		var columns []*dbstructs.Column
 		result := db.Raw(`
-				SELECT c.name AS column_name, t.name AS data_type, c.is_nullable,
+				SELECT c.name AS column_name, t.name AS data_type, 
+				c.is_nullable = 0 AS not_null,
 				CASE WHEN ic.index_column_id IS NOT NULL THEN 1 ELSE 0 END AS unique
 				FROM sys.columns c
 				INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
@@ -45,7 +46,7 @@ func (conn SQLServerConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.Table
 			log.Println("sqlserver.go:[2]", result.Error)
 			return nil, result.Error
 		}
-		table.Columns = append(table.Columns, columns...)
+		table.Columns = columns
 
 		// Get primary keys
 		var primaryKeys []string
@@ -70,15 +71,14 @@ func (conn SQLServerConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.Table
 			}
 			primaryKeys = append(primaryKeys, pkColumn)
 		}
-
 		table.PrimaryKey = primaryKeys
 
 		// Get relationships
 		var relationships []*dbstructs.RelationshipMetadata
 		result = db.Raw(`
 				SELECT 
-					fk.name AS constraint_name, 
-					OBJECT_NAME(fk.referenced_object_id) AS referenced_table_name
+					fk.name AS conname, 
+					OBJECT_NAME(fk.referenced_object_id) AS confrelid
 				FROM 
 					sys.foreign_keys fk
 				WHERE 
