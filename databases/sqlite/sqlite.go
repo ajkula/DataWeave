@@ -11,7 +11,8 @@ import (
 
 type SQLiteConnector struct{}
 
-func (conn SQLiteConnector) Connect(database string) (*gorm.DB, error) {
+func (conn SQLiteConnector) Connect(host, port, database, user, password string) (*gorm.DB, error) {
+	// only the 'database' parameter is used...
 	db, err := gorm.Open(sqlite.Open(database), &gorm.Config{})
 	if err != nil {
 		log.Println("sqlite.go: Connect error", err)

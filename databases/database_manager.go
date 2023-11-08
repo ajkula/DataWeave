@@ -3,6 +3,7 @@ package databases
 import (
 	mysqlConnector "db_meta/databases/mysql"
 	postgresConnector "db_meta/databases/postgres"
+	sqliteConnector "db_meta/databases/sqlite"
 	sqlserverConnector "db_meta/databases/sqlserver"
 	"db_meta/dbstructs"
 	"errors"
@@ -41,6 +42,8 @@ func (dbm *DatabaseManager) Connect(dbType, host, port, database, user, password
 		dbm.connector = &postgresConnector.PostgresConnector{}
 	case "mysql":
 		dbm.connector = &mysqlConnector.MySQLConnector{}
+	case "sqlite":
+		dbm.connector = &sqliteConnector.SQLiteConnector{}
 	case "sqlserver":
 		dbm.connector = &sqlserverConnector.SQLServerConnector{}
 	default:
