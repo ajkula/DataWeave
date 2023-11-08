@@ -6,6 +6,10 @@ export function ConfigureGorm(arg1, arg2, arg3, arg4, arg5, arg6) {
   return window['go']['main']['App']['ConfigureGorm'](arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
+export function GetTablesList() {
+  return window['go']['main']['App']['GetTablesList']();
+}
+
 export function GraphTransform() {
   return window['go']['main']['App']['GraphTransform']();
 }

@@ -1,5 +1,7 @@
 package dbstructs
 
+// Schema related
+
 type Column struct {
 	ColumnName string `gorm:"column:column_name" json:"columnName"`
 	DataType   string `json:"data_type"`
@@ -24,6 +26,8 @@ type TableMetadata struct {
 	Indexes       []*Index                `json:"indexes"`
 	Relationships []*RelationshipMetadata `json:"relationships"`
 }
+
+// Graph related
 
 type NodeElement struct {
 	Data *NodeData `json:"data"`
@@ -51,6 +55,8 @@ type GraphResponse struct {
 	Edges []*RelationshipEdge `json:"edges"`
 	Nodes []*NodeElement      `json:"nodes"`
 }
+
+// Schema integrity related
 
 type PrimaryKeyIssue struct {
 	TableName        string `json:"tableName"`

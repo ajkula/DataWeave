@@ -38,19 +38,21 @@ export const loadPage = async (pageName, data = undefined) => {
         if (pageModule) {
             const translations = await pageModule.getTranslations() ?? {};
             const pageElement = await injectTranslationsToHtmlString(pageModule.html, translations);
-            appDiv.innerHTML = ''; // Clear the appDiv if needed
-            appDiv.appendChild(pageElement.firstElementChild); // Insert the translated content into the DOM
+            appDiv.innerHTML = '';
+            appDiv.appendChild(pageElement); // Insert the translated content into the DOM
             navDiv.style.display = pageName !== pagesKeys.connection ? 'flex' : 'none';
 
-            // Create and start the DOM observer for dynamic translations
+            /** 
+             * Create and start the DOM observer for dynamic translations
+             *  
+             * https://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
+            */ 
             const domObserver = createDomObserver(translations, appDiv);
             const param = data ?? {};
             param['pageName'] = pageName;
             param['observer'] = await domObserver;
-            // if init function exists, call it
-            if (pageModule.init) {
-                await pageModule.init(param);
-            }
+
+            if (pageModule.init)  await pageModule.init(param);
             if (pageName !== pagesKeys.connection) nav.init(param);
         } else {
             console.error(`Page module for "${pageName}" not found.`);
@@ -70,12 +72,10 @@ export async function injectTranslationsToHtmlString(htmlString, translations) {
     // Create a tempo elem to contain HTML
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = htmlString;
-console.log(tempDiv);
     // Call trads on that tempo elem
     await injectTranslations(tempDiv, translations);
 
-    // Return it
-    return tempDiv;
+    return tempDiv.firstElementChild;
 }
 
 // Inject translated string vars to an HTML element
@@ -109,7 +109,11 @@ export async function injectTranslations(element, translations) {
     // Applying text injection recursively
     replaceText(element);
     if (translationsPerformed) {
-        // Logs text injection problems
+        /**
+         * Logs text injection problems
+         * this doesn't work fully since every module calls it 3x
+         * but lets you see what was in all 3 times...
+         */
         if (missingTranslations.length > 0) {
             console.log("Missing translations for keys:", missingTranslations);
         }
@@ -119,7 +123,6 @@ export async function injectTranslations(element, translations) {
     }
 }
 
-// Using MutationObserver
 async function createDomObserver(translations, appDiv) {
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {

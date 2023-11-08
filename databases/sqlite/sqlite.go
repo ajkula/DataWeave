@@ -21,6 +21,7 @@ func (conn SQLiteConnector) Connect(host, port, database, user, password string)
 	return db, nil
 }
 
+// FFS this one was such a pain...
 func (conn SQLiteConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableMetadata, error) {
 	tableNames, err := conn.GetTableNames(db)
 	if err != nil {

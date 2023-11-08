@@ -50,6 +50,11 @@ func (a *App) ConfigureGorm(dbType, host, port, database, user, password string)
 	return string(jsonData), nil
 }
 
+func (a *App) GetTablesList() []*dbstructs.TableMetadata {
+	tables := databases.GetDatabaseManagerInstance().Tables
+	return tables
+}
+
 func (a *App) GraphTransform() (string, error) {
 	connector := databases.GetDatabaseManagerInstance()
 	response := &dbstructs.GraphResponse{

@@ -1,16 +1,17 @@
 # README
 
-**db_meta** is a `desktop RGBDS tool` to visualise `tables and relations graph`, `check schema integrity` (in progress), `API and SWAGGER doc generator` (todo),
+**DataWeave** is a `desktop RGBDS tool` to visualise `tables and relations graph`, `check schema integrity` (in progress), `API and SWAGGER doc generator` (todo),
 `generate requests` (todo), and other yet to be designed utilities.
 
 ## About DataWeave
 
-Simply connect to your RGBDS on the connection page, you'll be redirected to the structural graph page if everything was fine, from there go to any pages by the left nav menu.
+Simply fill the connection page with your RGBDS configuration, you'll be redirected to the structural graph page if everything was fine, from there go to any pages by the left nav menu.
+Actually, 
 
 ## The project
 
 Basically you have the `databases` package exporting the `database_manager` abstraction layer.
-Its methods are attached to `(a *App) YouCallIt` to be added as Go-JS bindings.
+Its methods are attached to `(a *App) YourExportedMethod` to be added as Go-JS bindings.
 Upon succeeding connection, the app queries all it needs into structs, and several functions are applied to transform the data to other datatypes `Marshallable` to JSON.
 
 You can easily add the database you want by adding all the methods you can find in its own connector package, then add its support to the `database_manager` switch case and in the `connection module` selector options.

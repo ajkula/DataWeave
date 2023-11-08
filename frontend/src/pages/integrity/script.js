@@ -1,4 +1,4 @@
-import { PerformAllVerifications } from '../../../wailsjs/go/main/App';
+import { PerformAllVerifications, GetTablesList } from '../../../wailsjs/go/main/App';
 import './styles.css'
 
 export const html = `
@@ -31,15 +31,10 @@ export const html = `
 export async function init() {
   const schemaChecks = await PerformAllVerifications();
   const schemaData = JSON.parse(schemaChecks);
-  populateTableFilter([
-    ...new Set([
-      ...safeMap(schemaData.missingPrimaryKeys).map(item => item.tableName),
-      ...safeMap(schemaData.nullableColumns).map(item => item.tableName),
-      ...safeMap(schemaData.missingUniqueIndexes).map(item => item.tableName),
-      ...safeMap(schemaData.foreignKeyIssues).map(item => item.tableName),
-      ...safeMap(schemaData.redundantIndexes).map(item => item.tableName),
-    ]),
-  ]);
+  const tablesList = await GetTablesList();
+  populateTableFilter(
+      safeMap(tablesList).map(item => item.tableName),
+  );
   applyFilters(schemaData);
   document.getElementById('tableFilter').addEventListener('change', () => applyFilters(schemaData));
   document.getElementById('checkTypeFilter').addEventListener('change', () => applyFilters(schemaData));
