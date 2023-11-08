@@ -1,0 +1,32 @@
+#nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: rgb(1, 4, 10);
+  width: 100px;
+  min-width: 100px;
+  padding-top: 25px;
+  position: sticky;
+  top: 0;
+  overflow-x: hidden;
+}
+
+.item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  background-color: rgb(8, 16, 100);
+  color: rgb(196, 193, 193);
+  font-size: 1em;
+  font-weight: 600;
+  border-radius: 5px;
+  border: 1px solid #2508c1;
+  width: 90%;
+  margin: 5px;
+}
+
+.item:hover {
+  cursor: pointer;
+}
