@@ -71,14 +71,12 @@ db_meta/
     |       +-- dbstructs.go        // Structs package
     |   +-- postgres/
     |       +-- postgres.go         // PostgreSQL connector
-    |       +-- MySQL.go            // MySQL connector (todo)
-    |       +-- ....go              // Other SQL connector
     |   +-- mysql/
-    |       +-- mysql.go            // MySQL connector (todo)
+    |       +-- mysql.go            // MySQL connector
     |   +-- sqlite/
-    |       +-- sqlite.go           // SQLite connector (todo)
+    |       +-- sqlite.go           // SQLite connector
     |   +-- sqlserver/
-    |       +-- sqlserver.go        // SQL Server connector (todo)
+    |       +-- sqlserver.go        // SQL Server connector
     +-- lang/
         +-- translations.go         // Translations package (todo)
 ```

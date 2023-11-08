@@ -29,7 +29,6 @@ export const loadPage = async (pageName, data = undefined) => {
             case pagesKeys.integrity:
                 pageModule = integrityPage;
                 break;
-            // More pages 
             default:
                 pageModule = connectionPage;
                 break;
@@ -39,7 +38,7 @@ export const loadPage = async (pageName, data = undefined) => {
             const translations = await pageModule.getTranslations() ?? {};
             const pageElement = await injectTranslationsToHtmlString(pageModule.html, translations);
             appDiv.innerHTML = '';
-            appDiv.appendChild(pageElement); // Insert the translated content into the DOM
+            appDiv.appendChild(pageElement); // Insert the *initial* translated content into the DOM
             navDiv.style.display = pageName !== pagesKeys.connection ? 'flex' : 'none';
 
             /** 
