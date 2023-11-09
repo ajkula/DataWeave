@@ -2,13 +2,15 @@ import * as connectionPage from './pages/connection/script.js';
 import * as nav from './pages/nav/script.js';
 import * as graphPage from './pages/graph/script.js';
 import * as integrityPage from './pages/integrity/script.js';
+import * as restApiPage from './pages/apigen/script.js';
 import './style.css';
 import './app.css';
 
 export const pagesKeys = {
     'connection': 'connection',
     'graph': 'graph',
-    'integrity': 'integrity'
+    'integrity': 'integrity',
+    'restapi': 'restapi',
 };
 
 export const loadPage = async (pageName, data = undefined) => {
@@ -28,6 +30,9 @@ export const loadPage = async (pageName, data = undefined) => {
                 break;
             case pagesKeys.integrity:
                 pageModule = integrityPage;
+                break;
+            case pagesKeys.restapi:
+                pageModule = restApiPage;
                 break;
             default:
                 pageModule = connectionPage;

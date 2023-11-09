@@ -1,0 +1,83 @@
+#apiColContainer {
+  position: relative;
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px;
+}
+
+#apiFormContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 5px;
+}
+
+.api-card-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  padding: 5px;
+}
+
+.api-card-col {
+  display: flex;
+  flex-direction: column;
+  /* padding: 5px; */
+}
+
+/* Form styles */
+
+.endpoint-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 5px;
+  width: 100%;
+}
+
+.form-label {
+  display: flex;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.endpoint-header select,
+.endpoint-header input[type="text"],
+.endpoint-body select,
+.endpoint-body input[type="text"] {
+  width: 90%;
+  margin-bottom: 10px;
+  height: auto !important;
+  padding: 5px;
+}
+
+.http-methods button {
+  margin-left: 5px;
+  margin-bottom: 10px;
+}
+
+/* Styles pour les sections de formulaire */
+.endpoint-body {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+}
+
+.show-section-btn {
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.hidden {
+  display: none;
+}

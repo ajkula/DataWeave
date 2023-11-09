@@ -24,12 +24,12 @@ export const init = async (data) => {
       name: pagesKeys.integrity,
     },
     {
-      text: 'SQL Generator',
-      page: pagesKeys.graph,
-      name: null,
+      text: 'REST API',
+      page: pagesKeys.restapi,
+      name: pagesKeys.restapi,
     },
     {
-      text: 'REST API',
+      text: 'SQL Generator',
       page: pagesKeys.graph,
       name: null,
     },
