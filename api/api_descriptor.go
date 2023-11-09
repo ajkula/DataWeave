@@ -2,6 +2,8 @@ package api
 
 import "db_meta/dbstructs"
 
+// not totally sur it's nice, gotta move ui forw and see if it still fits
+
 // EndpointDefinition represents the structure for defining an API endpoint.
 type EndpointDefinition struct {
 	Path            string

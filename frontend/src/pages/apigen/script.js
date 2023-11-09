@@ -19,16 +19,14 @@ export async function init() {
   const newCard = createEndpointCard(tables);
   formContainer.appendChild(newCard);
 
-  // Déplacez cet événement dans la fonction init pour qu'il soit exécuté après la création des éléments
-  // Gérer les boutons bascules pour les méthodes HTTP
+  // HTTP methods switchs... todo
   document.querySelectorAll('.toggle-button').forEach(button => {
     button.addEventListener('click', function() {
       this.classList.toggle('active');
-      // Ici, vous pouvez ajouter la logique pour activer ou désactiver la méthode HTTP
     });
   });
   
-  // Ajoutez un gestionnaire d'événements pour les boutons qui affichent les sections cachées
+  // Toggle .hidden
   document.querySelectorAll('.show-section-btn').forEach(button => {
     button.addEventListener('click', function() {
       const section = document.querySelector('.' + this.dataset.section + '-section');
@@ -43,7 +41,7 @@ function createLabel(text) {
 
 function createEndpointCard(tables) {
   const cardContainer = document.createElement('div');
-  cardContainer.innerHTML = endpointCardTemplate(tables); // Passez les tables au modèle
+  cardContainer.innerHTML = endpointCardTemplate(tables);
 
   return cardContainer.firstElementChild;
 }
@@ -59,7 +57,7 @@ function createContentTypeSelector() {
   `;
 }
 
-// Ajoutez cette fonction pour créer un sélecteur pour les emplacements des paramètres
+// Param source types selector
 function createParameterLocationSelector() {
   const locations = ['query', 'header', 'path', 'cookie'];
   let options = locations.map(location => `<option value="${location}">${location}</option>`).join('');
@@ -71,7 +69,7 @@ function createParameterLocationSelector() {
   `;
 }
 
-// Ajoutez cette fonction pour créer un sélecteur pour les types de sécurité
+// Secu types selector
 function createSecurityTypeSelector() {
   const securityTypes = ['apiKey', 'http', 'oauth2', 'openIdConnect'];
   let options = securityTypes.map(type => `<option value="${type}">${type}</option>`).join('');
@@ -83,9 +81,7 @@ function createSecurityTypeSelector() {
   `;
 }
 
-// Modifiez cette fonction pour accepter les tables et retourner le modèle avec le select intégré
 function endpointCardTemplate(tables) {
-  // Créez un élément select pour les tables
   let tablesOptions = tables.map(table => `<option value="${table.tableName}">${table.tableName}</option>`).join('');
   let methodsOptions = HTTP_METHOD_LIST.map(method => `<option value="${method}">${method}</option>`).join('');
 
@@ -115,9 +111,9 @@ function endpointCardTemplate(tables) {
       <button class="show-section-btn" data-section="parameters">Show Parameters</button>
       <div class="parameters-section">
         ${createParameterLocationSelector()}
-        <!-- Ajoutez d'autres champs de formulaire ici -->
+        <!-- more forms prolly here -->
       </div>
-      <!-- Répétez pour les sections Responses, Security -->
+      <!-- sections Responses, Security... whatever, I still gotta prep this UI -->
     </div>
   </div>
   `;
