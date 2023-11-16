@@ -3,52 +3,46 @@ package databases
 import (
 	"db_meta/dbstructs"
 	"log"
-	"strconv"
 )
 
 // Function to find SCCs using Kosaraju's algorithm
 func FindSCCs(graphResponse *dbstructs.GraphResponse) [][]string {
-	// Creating a map for tracking visited nodes and a stack for storing nodes
 	visited := make(map[string]bool)
 	var stack []string
 
-	// First DFS pass to fill the stack
+	// First DFS pass
 	for _, node := range graphResponse.Nodes {
 		if !visited[node.Data.Name] {
 			dfs1(node.Data, graphResponse, visited, &stack)
 		}
 	}
 
-	// Creating the transposed graph
 	transposedGraph := transposeGraph(graphResponse)
 
-	// Second DFS pass for SCCs
+	// Second DFS
 	visited = make(map[string]bool)
 	var sccs [][]string
 	for len(stack) > 0 {
-		nodeId := stack[len(stack)-1]
+		nodeName := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 
-		if !visited[nodeId] {
+		if !visited[nodeName] {
 			var scc []string
-			id, err := strconv.Atoi(nodeId)
-			if err != nil {
-				log.Println(err)
-			}
-			dfs2(transposedGraph.Nodes[id].Data, transposedGraph, visited, &scc)
+			dfs2(findNodeByName(nodeName, transposedGraph).Data, transposedGraph, visited, &scc)
 			sccs = append(sccs, scc)
 		}
 	}
-
 	log.Println(sccs)
+
 	return sccs
 }
 
 func dfs1(node *dbstructs.NodeData, graph *dbstructs.GraphResponse, visited map[string]bool, stack *[]string) {
 	visited[node.Name] = true
 	for _, edge := range graph.Edges {
-		if edge.Data.Source == node.Name && !visited[edge.Data.Target] {
-			dfs1(findNodeData(edge.Data.Target, graph), graph, visited, stack)
+		targetNode := findNodeData(edge.Data.Target, graph)
+		if edge.Data.Source == node.Name && !visited[targetNode.Name] {
+			dfs1(targetNode, graph, visited, stack)
 		}
 	}
 	*stack = append(*stack, node.Name)
@@ -58,8 +52,9 @@ func dfs2(node *dbstructs.NodeData, graph *dbstructs.GraphResponse, visited map[
 	visited[node.Name] = true
 	*scc = append(*scc, node.Name)
 	for _, edge := range graph.Edges {
-		if edge.Data.Target == node.Name && !visited[edge.Data.Source] {
-			dfs2(findNodeData(edge.Data.Source, graph), graph, visited, scc)
+		sourceNode := findNodeData(edge.Data.Source, graph)
+		if edge.Data.Target == node.Name && !visited[sourceNode.Name] {
+			dfs2(sourceNode, graph, visited, scc)
 		}
 	}
 }
@@ -96,6 +91,15 @@ func transposeGraph(originalGraph *dbstructs.GraphResponse) *dbstructs.GraphResp
 	}
 
 	return transposedGraph
+}
+
+func findNodeByName(nodeName string, graph *dbstructs.GraphResponse) *dbstructs.NodeElement {
+	for _, node := range graph.Nodes {
+		if node.Data.Name == nodeName {
+			return node
+		}
+	}
+	return nil
 }
 
 func findNodeData(nodeId string, graph *dbstructs.GraphResponse) *dbstructs.NodeData {
