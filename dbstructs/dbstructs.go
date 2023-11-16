@@ -95,4 +95,5 @@ type SchemaVerificationResults struct {
 	MissingUniqueIndexes []*UniqueIndexIssue    `json:"missingUniqueIndexes"`
 	ForeignKeyIssues     []*ForeignKeyIssue     `json:"foreignKeyIssues"`
 	RedundantIndexes     []*RedundantIndexIssue `json:"redundantIndexes"`
+	SCCs                 [][]string             `json:"sccs"`
 }

@@ -14,7 +14,8 @@ export const html = `
       <option value="missingUniqueIndexes">string:missingUniqueIndexes;</option>
       <option value="foreignKeyIssues">string:foreignKeyIssues;</option>
       <option value="redundantIndexes">string:redundantIndexes;</option>
-    </select>
+      <option value="sccs">string:sccs;</option>
+      </select>
 
     <label for="tableFilter">string:tableFilter; :</label>
     <select id="tableFilter" class="filterInput">
@@ -31,9 +32,10 @@ export const html = `
 export async function init() {
   const schemaChecks = await PerformAllVerifications();
   const schemaData = JSON.parse(schemaChecks);
+  console.log(schemaData)
   const tablesList = await GetTablesList();
   populateTableFilter(
-      safeMap(tablesList).map(item => item.tableName),
+    safeMap(tablesList).map(item => item.tableName),
   );
   applyFilters(schemaData);
   document.getElementById('tableFilter').addEventListener('change', () => applyFilters(schemaData));
@@ -83,11 +85,21 @@ function getFilteredProblems(selectedTable, selectedCheckType, schemaData) {
   if (selectedCheckType === 'redundantIndexes') {
     problems = problems.concat(safeMap(schemaData.redundantIndexes));
   }
+  if (selectedCheckType === 'sccs') {
+    problems = problems.concat(safeMap(schemaData.sccs).reduce((acc, scc) => {
+      if (scc.length > 1) {
+        acc.push({ scc: scc, tableName: "SCC" });
+        return acc;
+      }
+      return acc;
+    }, []));
+  }
 
-  if (selectedTable !== 'All Tables') {
+  if (selectedTable !== 'All Tables' && selectedCheckType !== 'sccs') {
     problems = problems.filter(problem => problem.tableName === selectedTable);
   }
 
+  console.log({ problems })
   return problems;
 }
 
@@ -102,7 +114,7 @@ function formatProblemToCard(problem) {
   card.appendChild(title);
 
   // Col name if exists
-  if (problem.columnName) {
+  if (problem.columnName ?? false) {
     const columnName = document.createElement('div');
     columnName.className = "column";
     columnName.textContent = problem.columnName;
@@ -110,7 +122,7 @@ function formatProblemToCard(problem) {
   }
 
   // index name...
-  if (problem.indexName) {
+  if (problem.indexName ?? false) {
     const indexName = document.createElement('div');
     indexName.className = "index";
     indexName.textContent = problem.indexName;
@@ -118,11 +130,23 @@ function formatProblemToCard(problem) {
   }
 
   // Related Table..
-  if (problem.relatedTableName) {
+  if (problem.relatedTableName ?? false) {
     const relatedTable = document.createElement('div');
     relatedTable.className = "relatedTable";
     relatedTable.textContent = problem.relatedTableName;
     card.appendChild(relatedTable);
+  }
+
+  // Related Table..
+  if (problem.scc ?? false) {
+    console.log("table");
+    problem.scc.forEach(table => {
+      const scc = document.createElement('div');
+      scc.className = "column";
+      console.log(table);
+      scc.textContent = table;
+      card.appendChild(scc);
+    })
   }
 
   // Description...
@@ -148,5 +172,6 @@ export async function getTranslations(msg = null) {
     missingUniqueIndexes: 'Indexs manquants',
     foreignKeyIssues: 'Problèmes de foreign key',
     redundantIndexes: 'Indexs redondants',
+    sccs: 'Relations circulaires',
   };
 }

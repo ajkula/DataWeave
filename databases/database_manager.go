@@ -116,7 +116,7 @@ func (dbm *DatabaseManager) PerformAllVerifications() (*dbstructs.SchemaVerifica
 	results := &dbstructs.SchemaVerificationResults{}
 	var mu sync.Mutex // Mutex to protect append operations
 
-	done := make(chan bool, 5) // Channel to signal when a goroutine is done
+	done := make(chan bool, 6) // Channel to signal when a goroutine is done
 
 	// Check for missing primary keys
 	go func() {
@@ -232,7 +232,17 @@ func (dbm *DatabaseManager) PerformAllVerifications() (*dbstructs.SchemaVerifica
 		done <- true
 	}()
 
-	for i := 0; i < 5; i++ {
+	// check for SCCs in schema relations
+	go func() {
+		graph := &dbstructs.GraphResponse{
+			Edges: dbm.Edges,
+			Nodes: dbm.Nodes,
+		}
+		results.SCCs = FindSCCs(graph)
+		done <- true
+	}()
+
+	for i := 0; i < 6; i++ {
 		<-done
 	}
 

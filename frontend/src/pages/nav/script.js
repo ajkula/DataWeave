@@ -1,15 +1,14 @@
 import { pagesKeys, loadPage } from '../../main';
 import './styles.css';
 
-export const html = `<div></div>
-`
+export const html = ``;
 
 export const init = async (data) => {
   const { pageName } = data;
   const navDiv = document.getElementById('nav');
   const items = [
     {
-      text: 'Connexion',
+      text: 'Connexion', // gotta import trads and build items
       page: pagesKeys.connection,
       name: pagesKeys.connection,
     },
