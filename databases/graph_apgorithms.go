@@ -76,7 +76,7 @@ func transposeGraph(originalGraph *dbstructs.GraphResponse) *dbstructs.GraphResp
 			Data: &dbstructs.NodeData{
 				Name:       node.Data.Name,
 				ID:         node.Data.ID,
-				Columns:    node.Data.Columns, // check in case smthn isn't right
+				Columns:    node.Data.Columns,
 				PrimaryKey: node.Data.PrimaryKey,
 				Indexes:    node.Data.Indexes,
 			},
