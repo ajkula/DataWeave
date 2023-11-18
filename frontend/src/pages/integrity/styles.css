@@ -23,6 +23,7 @@
   width: fit-content;
   height: fit-content;
   color: black;
+  min-width: 234px;
 }
 
 .problemCard .title {

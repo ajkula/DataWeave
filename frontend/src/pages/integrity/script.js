@@ -87,16 +87,20 @@ function getFilteredProblems(selectedTable, selectedCheckType, schemaData) {
   }
   if (selectedCheckType === 'sccs') {
     problems = problems.concat(safeMap(schemaData.sccs).reduce((acc, scc) => {
-      if (scc.length > 1) {
-        acc.push({ scc: scc, tableName: "SCC" });
+    //  if (scc.length > 1) {
+        acc.push({ scc: scc, tableName: "string:SCC;" });
         return acc;
-      }
+    //  } commented for debug
       return acc;
     }, []));
   }
 
-  if (selectedTable !== 'All Tables' && selectedCheckType !== 'sccs') {
-    problems = problems.filter(problem => problem.tableName === selectedTable);
+  if (selectedTable !== 'All Tables') {
+    if (selectedCheckType !== 'sccs') {
+      problems = problems.filter(problem => problem.tableName === selectedTable);
+    } else {
+      problems = problems.filter(problem => problem.scc.includes(selectedTable));
+    }
   }
 
   console.log({ problems })
@@ -107,7 +111,7 @@ function formatProblemToCard(problem) {
   const card = document.createElement('div');
   card.className = 'problemCard';
 
-  // Card title
+  // Card title. as 'tableName' field
   const title = document.createElement('div');
   title.className = "title";
   title.textContent = problem.tableName;
@@ -139,10 +143,9 @@ function formatProblemToCard(problem) {
 
   // Related Table..
   if (problem.scc ?? false) {
-    console.log("table");
     problem.scc.forEach(table => {
       const scc = document.createElement('div');
-      scc.className = "column";
+      scc.className = "column"; // columnName's css for bold font.
       console.log(table);
       scc.textContent = table;
       card.appendChild(scc);
@@ -173,5 +176,6 @@ export async function getTranslations(msg = null) {
     foreignKeyIssues: 'Problèmes de foreign key',
     redundantIndexes: 'Indexs redondants',
     sccs: 'Relations circulaires',
+    SCC: 'SCC group'
   };
 }

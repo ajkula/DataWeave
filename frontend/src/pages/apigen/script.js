@@ -1,5 +1,10 @@
 import { GetTablesList } from '../../../wailsjs/go/main/App';
 import "./styles.css";
+const HTTP_METHOD_LIST = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+const CONTENT_TYPES = ['application/json', 'application/xml', 'text/plain', 'multipart/form-data'];
+const PARAMETERS_LOCATION = ['query', 'header', 'path', 'cookie'];
+const SECURITY_TYPES = ['apiKey', 'http', 'oauth2', 'openIdConnect'];
+let selecteed_table = {}
 
 export const html = `
 <div id="apiColContainer">
@@ -9,12 +14,11 @@ export const html = `
 </div>
 `;
 
-export const HTTP_METHOD_LIST = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
-
 export async function init() {
-  const formContainer = document.getElementById('apiFormContainer');
   const tables = await GetTablesList();
-  console.log(tables);
+  selecteed_table = tables[0];
+  const formContainer = document.getElementById('apiFormContainer');
+  console.log(selecteed_table);
   
   const newCard = createEndpointCard(tables);
   formContainer.appendChild(newCard);
@@ -42,78 +46,41 @@ function createLabel(text) {
 function createEndpointCard(tables) {
   const cardContainer = document.createElement('div');
   cardContainer.innerHTML = endpointCardTemplate(tables);
-
   return cardContainer.firstElementChild;
 }
 
-function createContentTypeSelector() {
-  const contentTypes = ['application/json', 'application/xml', 'text/plain', 'multipart/form-data'];
-  let options = contentTypes.map(type => `<option value="${type}">${type}</option>`).join('');
-  return `
-    <select class="content-type-select">
-      <option value="">Select Content Type</option>
-      ${options}
-    </select>
-  `;
-}
-
-// Param source types selector
-function createParameterLocationSelector() {
-  const locations = ['query', 'header', 'path', 'cookie'];
-  let options = locations.map(location => `<option value="${location}">${location}</option>`).join('');
+function createLabeledSelectorFromList(arr, selectName) {
+  let options = arr.map(item => `<option value="${item}">${item}</option>`).join('');
   return `
     <select class="parameter-location-select">
-      <option value="">Select Parameter Location</option>
-      ${options}
-    </select>
-  `;
-}
-
-// Secu types selector
-function createSecurityTypeSelector() {
-  const securityTypes = ['apiKey', 'http', 'oauth2', 'openIdConnect'];
-  let options = securityTypes.map(type => `<option value="${type}">${type}</option>`).join('');
-  return `
-    <select class="security-type-select">
-      <option value="">Select Security Type</option>
+      <option value="">${selectName}</option>
       ${options}
     </select>
   `;
 }
 
 function endpointCardTemplate(tables) {
-  let tablesOptions = tables.map(table => `<option value="${table.tableName}">${table.tableName}</option>`).join('');
-  let methodsOptions = HTTP_METHOD_LIST.map(method => `<option value="${method}">${method}</option>`).join('');
+  let tablesOptions = tables.map(table => table.tableName);
 
   return `
   <div class="endpoint-card">
     <div class="endpoint-header api-card-row">
       <div class="api-card-col">
         ${createLabel('Select Table')}
-        <select class="table-select">
-          <option value="">Select Table</option>
-          ${tablesOptions}
-        </select>
+        ${createLabeledSelectorFromList(tablesOptions, "Select Table")}
         ${createLabel('Select Method')}
-        <select class="method-select">
-          <option value="">Select Method</option>
-          ${methodsOptions}
-        </select>
+        ${createLabeledSelectorFromList(HTTP_METHOD_LIST, "Select Method")}
       </div>
       <div class="api-card-col">
-        ${createLabel('Endpoint Description')}
-        <input type="text" placeholder="Description" class="endpoint-description">
-        ${createLabel('Endpoint Operation ID')}
-        <input type="text" placeholder="Operation ID" class="endpoint-operation-id">
+        ${createLabel("Parameters")}
+        ${createLabeledSelectorFromList(PARAMETERS_LOCATION, "Parameters")}
+        ${createLabel("Security Type")}
+        ${createLabeledSelectorFromList(SECURITY_TYPES, "Security Type")}
       </div>
-    </div>
-    <div class="endpoint-body">
-      <button class="show-section-btn" data-section="parameters">Show Parameters</button>
-      <div class="parameters-section">
-        ${createParameterLocationSelector()}
-        <!-- more forms prolly here -->
+      <div class="api-card-col">
+        ${createLabel("Content Type")}
+        ${createLabeledSelectorFromList(CONTENT_TYPES, "Content Type")}
       </div>
-      <!-- sections Responses, Security... whatever, I still gotta prep this UI -->
     </div>
   </div>
   `;
