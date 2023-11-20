@@ -1,0 +1,75 @@
+{
+  "Path": "/examplePath",
+  "GET": {
+    "Enabled": true,
+    "Description": "Get example",
+    "OperationId": "getExample",
+    "RequestBody": null,
+    "QueryParameters": [
+      {
+        "Name": "param1",
+        "In": "query",
+        "Description": "First parameter",
+        "Required": true,
+        "Schema": "string",
+        "Example": "exampleValue"
+      }
+    ],
+    "Responses": {
+      "200": {
+        "Description": "Successful response",
+        "Headers": {
+          "Content-Type": {
+            "Description": "Content Type",
+            "Required": true,
+            "Schema": "string"
+          }
+        },
+        "Content": {
+          "application/json": {
+            "Schema": "object",
+            "Example": "exampleJsonResponse"
+          }
+        }
+      }
+    }
+  },
+  "POST": null,
+  "PUT": null,
+  "PATCH": null,
+  "DELETE": null,
+  "Parameters": [],
+  "Responses": {},
+  "Tags": ["exampleTag"],
+  "Security": [
+    {
+      "Type": "apiKey",
+      "Scheme": "scheme1",
+      "BearerFormat": "format1",
+      "In": "header",
+      "Name": "Authorization"
+    }
+  ],
+  "Description": "Example endpoint",
+  "OperationId": "exampleOperation",
+  "RequestBody": {
+    "Description": "Description of the request body",
+    "Required": true,
+    "Content": {
+      "application/json": {
+        "Schema": "object",
+        "Example": "exampleJsonRequestBody"
+      }
+    }
+  },
+  "QueryParameters": [
+    {
+      "Name": "exampleQueryParam",
+      "In": "query",
+      "Description": "Example query parameter",
+      "Required": false,
+      "Schema": "string",
+      "Example": "exampleValue"
+    }
+  ]
+}

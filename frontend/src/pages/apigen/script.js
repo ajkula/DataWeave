@@ -10,6 +10,12 @@ export const html = `
 <div id="apiColContainer">
   <h1>string:pageTitle;</h1>
   <div id="result" class="result"></div>
+  <div class="controls">
+    <label for="add">string:addCard; :</label>
+    <button id="add" class="addBtn">string:addCard;</button>
+    <label for="submitBtn">string:submitBtn; :</label>
+    <button id="submitBtn" class="submitBtn">string:submitBtn;</button>
+  </div>
   <div id="apiFormContainer"></div>
 </div>
 `;
@@ -22,21 +28,8 @@ export async function init() {
   
   const newCard = createEndpointCard(tables);
   formContainer.appendChild(newCard);
-
-  // HTTP methods switchs... todo
-  document.querySelectorAll('.toggle-button').forEach(button => {
-    button.addEventListener('click', function() {
-      this.classList.toggle('active');
-    });
-  });
   
-  // Toggle .hidden
-  document.querySelectorAll('.show-section-btn').forEach(button => {
-    button.addEventListener('click', function() {
-      const section = document.querySelector('.' + this.dataset.section + '-section');
-      section.classList.toggle('hidden');
-    });
-  });
+  initializeEventListeners();
 };
 
 function createLabel(text) {
@@ -49,10 +42,11 @@ function createEndpointCard(tables) {
   return cardContainer.firstElementChild;
 }
 
-function createLabeledSelectorFromList(arr, selectName) {
+function createLabeledSelectorFromList(arr, selectName, extraClass = "") {
   let options = arr.map(item => `<option value="${item}">${item}</option>`).join('');
   return `
-    <select class="parameter-location-select">
+    ${createLabel(selectName)}
+    <select class="parameter-location-select ${extraClass}">
       <option value="">${selectName}</option>
       ${options}
     </select>
@@ -66,19 +60,13 @@ function endpointCardTemplate(tables) {
   <div class="endpoint-card">
     <div class="endpoint-header api-card-row">
       <div class="api-card-col">
-        ${createLabel('Select Table')}
         ${createLabeledSelectorFromList(tablesOptions, "Select Table")}
-        ${createLabel('Select Method')}
         ${createLabeledSelectorFromList(HTTP_METHOD_LIST, "Select Method")}
+        ${createByIdSwitch("byIdSwitch", "Ressource by ID")}
       </div>
       <div class="api-card-col">
-        ${createLabel("Parameters")}
         ${createLabeledSelectorFromList(PARAMETERS_LOCATION, "Parameters")}
-        ${createLabel("Security Type")}
         ${createLabeledSelectorFromList(SECURITY_TYPES, "Security Type")}
-      </div>
-      <div class="api-card-col">
-        ${createLabel("Content Type")}
         ${createLabeledSelectorFromList(CONTENT_TYPES, "Content Type")}
       </div>
     </div>
@@ -86,8 +74,36 @@ function endpointCardTemplate(tables) {
   `;
 }
 
+function createByIdSwitch(id, label) {
+  return `
+    ${createLabel(label)}
+    <label class="switch">
+        <input type="checkbox" id="${id}">
+        <span class="slider round"></span>
+    </label>
+  `;
+}
+
+function initializeEventListeners() {
+  document.getElementById('submitBtn').addEventListener('click', function() {
+    console.log("CREATE !")
+  });
+
+
+  // Listener for "ById" switch
+  const byIdSwitch = document.getElementById('byIdSwitch');
+  if (byIdSwitch) {
+      byIdSwitch.addEventListener('change', function(ev) {
+          console.log(ev.target.checked)
+          // todo: Activation logic for "ById"...
+      });
+  }
+}
+
 export async function getTranslations(msg = null) {
   return {
     pageTitle: "REST API",
+    addCard: "Ajouter un EndPoint",
+    submitBtn: "Créer l'API",
   }
 };
