@@ -3,6 +3,10 @@
 **DataWeave** is a `desktop RGBDS tool` to visualise `tables and relations graph`, `check schema integrity` (in progress), `API and SWAGGER doc generator` (todo),
 `generate requests` (todo), and other yet to be designed utilities.
 
+## Requirements
+
+You'll need Golang installed, Wails V2 and Nodejs latest.
+
 ## About DataWeave
 
 Simply fill the connection page with your RGBDS configuration, you'll be redirected to the structural graph page if everything was fine, from there go to any pages by the left nav menu.
@@ -81,6 +85,33 @@ db_meta/
         +-- translations.go         // Translations package (todo)
 ```
 
+## Tests
+
+The test files are located next to their respective source code files.
+For exemple :
+>  // consider the file :
+>  ./calculation.go
+>  ./calculation_test.go // would be it's test file
+
+To execute tests the commands are :
+#### All tests, from the project root folder :
+```bash
+go test ./...
+```
+
+#### All package tests, from the package root folder :
+```bash
+go test
+```
+>  `or specify the relative path to the package :`
+>  ```bash
+>  go test ./package/folder
+>  ```
+
+#### execute tests with special parameters :
+```bash
+go test ./... -timeout 60s
+```
 
 
 ## About Wails

@@ -3,7 +3,6 @@ module db_meta
 go 1.18
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21
 	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.8.4
