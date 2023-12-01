@@ -6,7 +6,7 @@ type Column struct {
 	ColumnName string `gorm:"column:column_name" json:"columnName"`
 	DataType   string `json:"data_type"`
 	NotNull    bool   `json:"not_null"`
-	Unique     bool   `json:"unique"`
+	Unique     bool   `gorm:"column:is_unique" json:"unique"`
 }
 
 type RelationshipMetadata struct {

@@ -42,7 +42,7 @@ func (conn PostgresConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableM
 						ON ccu.constraint_name = tc.constraint_name
 						WHERE tc.table_name = columns.table_name
 						AND tc.constraint_type = 'UNIQUE'
-						AND ccu.column_name = columns.column_name) > 0 as unique
+						AND ccu.column_name = columns.column_name) > 0 as is_unique
 				FROM information_schema.columns
 				WHERE table_name = ?`, tableName).Scan(&columns)
 		if result.Error != nil {

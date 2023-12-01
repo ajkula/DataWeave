@@ -36,12 +36,20 @@ func (conn MySQLConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableMeta
 		// Get columns
 		var columns []*dbstructs.Column
 		result := db.Raw(`
-                SELECT column_name, data_type, is_nullable = 'NO' as not_null,
-                (SELECT count(*) FROM information_schema.statistics
-                        WHERE table_name = ? AND non_unique = 0
-                        AND column_name = columns.column_name) > 0 as unique
-                FROM information_schema.columns
-                WHERE table_name = ?`, tableName, tableName).Scan(&columns)
+        SELECT 
+						COLUMN_NAME as column_name, 
+            DATA_TYPE as data_type, 
+            IS_NULLABLE = 'NO' as not_null,
+            (SELECT COUNT(*) 
+             FROM information_schema.statistics 
+             WHERE TABLE_NAME = ? 
+             AND table_schema = DATABASE() 
+             AND NON_UNIQUE = 0 
+             AND COLUMN_NAME = columns.COLUMN_NAME
+            ) > 0 as is_unique
+        FROM information_schema.columns
+        WHERE table_name = ? 
+        AND table_schema = DATABASE()`, tableName, tableName).Scan(&columns)
 		if result.Error != nil {
 			log.Println("mysql.go:[2]", result.Error)
 			return nil, result.Error

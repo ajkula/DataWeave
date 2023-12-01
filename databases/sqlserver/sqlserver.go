@@ -13,6 +13,7 @@ type SQLServerConnector struct{}
 
 func (conn SQLServerConnector) Connect(host, port, database, user, password string) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s", user, password, host, port, database)
+
 	db, err := gorm.Open(sqlserver.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Println("sqlserver.go:[1]", err)
@@ -37,7 +38,7 @@ func (conn SQLServerConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.Table
 		result := db.Raw(`
 				SELECT c.name AS column_name, t.name AS data_type, 
 				c.is_nullable = 0 AS not_null,
-				CASE WHEN ic.index_column_id IS NOT NULL THEN 1 ELSE 0 END AS unique
+				CASE WHEN ic.index_column_id IS NOT NULL THEN 1 ELSE 0 END AS is_unique
 				FROM sys.columns c
 				INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
 				LEFT JOIN sys.index_columns ic ON ic.object_id = c.object_id AND ic.column_id = c.column_id

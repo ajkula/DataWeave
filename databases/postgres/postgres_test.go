@@ -53,7 +53,7 @@ func startPostgresContainer(t *testing.T) (*testcontainers.Container, string, st
 		t.Fatalf("Failed to start postgres container: %s", err)
 	}
 
-	// Récupération de l'adresse IP et du port
+	// Get host and port
 	host, err := postgresContainer.Host(ctx)
 	if err != nil {
 		t.Fatalf("Failed to get container host: %s", err)
@@ -67,32 +67,30 @@ func startPostgresContainer(t *testing.T) (*testcontainers.Container, string, st
 }
 
 func TestPostgresConnector_Connect(t *testing.T) {
-	// Démarrage du conteneur PostgreSQL et récupération des informations de connexion
+	// Starting PostgreSQL container and get connection infos
 	postgresContainer, host, port, database, user, password := startPostgresContainer(t)
 	defer (*postgresContainer).Terminate(context.Background())
 
-	// Connexion au conteneur PostgreSQL
+	// Connection to PostgreSQL
 	connector := PostgresConnector{}
 	db, err := connector.Connect(host, port, database, user, password)
 	assert.NoError(t, err)
 	assert.NotNil(t, db)
 
-	// Création du schéma de test dans la base de données
+	// Test schema creation in DB
 	err = createTestSchema(db)
 	assert.NoError(t, err)
 
-	// Fermer la connexion à la fin du test
+	// Close DB at the end
 	sqlDB, err := db.DB()
 	assert.NoError(t, err)
 	defer sqlDB.Close()
 }
 
 func TestPostgresConnector_GetTableNames(t *testing.T) {
-	// Démarrage du conteneur PostgreSQL et récupération des informations de connexion
 	postgresContainer, host, port, database, user, password := startPostgresContainer(t)
 	defer (*postgresContainer).Terminate(context.Background())
 
-	// Connexion au conteneur PostgreSQL
 	connector := PostgresConnector{}
 	db, err := connector.Connect(host, port, database, user, password)
 	assert.NoError(t, err)
@@ -108,7 +106,7 @@ func TestPostgresConnector_GetTableNames(t *testing.T) {
 func TestPostgresConnector_Connect_error(t *testing.T) {
 	connector := PostgresConnector{}
 
-	// Test avec des paramètres invalides
+	// Test with invalid params
 	_, err := connector.Connect("invalidHost", "invalidPort", "invalidDatabase", "invalidUser", "invalidPassword")
 	assert.Error(t, err, "Invalid parameters should fail to connect")
 

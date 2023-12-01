@@ -93,6 +93,8 @@ For exemple :
 >  ./calculation.go
 >  ./calculation_test.go // would be it's test file
 
+You need to have the docker daemon running.
+
 To execute tests the commands are :
 #### All tests, from the project root folder :
 ```bash
