@@ -235,16 +235,10 @@ func TestDatabaseManager_MySQL_GetTableMetadata(t *testing.T) {
 
 	dbm := DatabaseManager{}
 	db, err := dbm.Connect(mysqldb, host, port, database, user, password)
-	if err != nil {
-		t.Fatal(err)
-	}
 	assert.NoError(t, err)
 	assert.NotNil(t, db)
 
 	err = createTestMySQLSchema(db)
-	if err != nil {
-		t.Fatal(err)
-	}
 	assert.NoError(t, err)
 
 	actualData, err := dbm.GetTableMetadata()
@@ -269,10 +263,8 @@ func TestDatabaseManager_SQLServer_GetTableMetadata(t *testing.T) {
 
 	dbm := DatabaseManager{}
 	db, err := dbm.Connect(sqlserverdb, host, port, database, user, password)
-	if err != nil {
-		t.Fatal(err)
-		assert.NotNil(t, db)
-	}
+	assert.NoError(t, err)
+	assert.NotNil(t, db)
 
 	// Create testdb databse
 	err = db.Exec("CREATE DATABASE testdb;").Error
@@ -285,12 +277,14 @@ func TestDatabaseManager_SQLServer_GetTableMetadata(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	assert.NotNil(t, newDB)
 
 	err = createTestSQLServerSchema(newDB)
 	assert.NoError(t, err)
 
 	metaData, err := dbm.GetTableMetadata()
 	assert.NoError(t, err)
+
 	metaDataJSON, err := json.Marshal(metaData)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedSQLServerJSON, string(metaDataJSON))
