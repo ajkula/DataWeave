@@ -19,7 +19,7 @@ import (
 
 const expectedPostgresJSON = `[{"tableName":"table1","columns":[{"columnName":"id","data_type":"integer","not_null":true,"unique":false},{"columnName":"name","data_type":"character varying","not_null":false,"unique":false}],"primary_key":["id"],"indexes":[{"name":"table1_pkey","columns":["id"]}],"relationships":[{"Conname":"table2_table1_id_fkey","RelatedTableName":"table1"}]},{"tableName":"table2","columns":[{"columnName":"id","data_type":"integer","not_null":true,"unique":false},{"columnName":"table1_id","data_type":"integer","not_null":false,"unique":false},{"columnName":"description","data_type":"character varying","not_null":false,"unique":false}],"primary_key":["id"],"indexes":[{"name":"table2_pkey","columns":["id"]}],"relationships":null},{"tableName":"table3","columns":[{"columnName":"id","data_type":"integer","not_null":true,"unique":false},{"columnName":"info","data_type":"character varying","not_null":false,"unique":false}],"primary_key":["id"],"indexes":[{"name":"table3_pkey","columns":["id"]}],"relationships":null}]`
 const expectedMySQLJSON = `[{"tableName":"table1","columns":[{"columnName":"id","data_type":"bigint","not_null":true,"unique":true},{"columnName":"name","data_type":"varchar","not_null":false,"unique":false}],"primary_key":["id"],"indexes":[{"name":"PRIMARY","columns":["id"]}],"relationships":null},{"tableName":"table2","columns":[{"columnName":"description","data_type":"varchar","not_null":false,"unique":false},{"columnName":"id","data_type":"bigint","not_null":true,"unique":true},{"columnName":"table1_id","data_type":"bigint","not_null":false,"unique":false}],"primary_key":["id"],"indexes":[{"name":"PRIMARY","columns":["id"]},{"name":"table1_id","columns":["table1_id"]}],"relationships":[{"Conname":"table2_ibfk_1","RelatedTableName":"table1"}]},{"tableName":"table3","columns":[{"columnName":"id","data_type":"bigint","not_null":true,"unique":true},{"columnName":"info","data_type":"varchar","not_null":false,"unique":false}],"primary_key":["id"],"indexes":[{"name":"PRIMARY","columns":["id"]}],"relationships":null}]`
-const expectedSQLServerJSON = ``
+const expectedSQLServerJSON = `[{"tableName":"spt_fallback_db","columns":[{"columnName":"xserver_name","data_type":"varchar","not_null":false,"unique":false},{"columnName":"xdttm_ins","data_type":"datetime","not_null":false,"unique":false},{"columnName":"xdttm_last_ins_upd","data_type":"datetime","not_null":false,"unique":false},{"columnName":"xfallback_dbid","data_type":"smallint","not_null":false,"unique":false},{"columnName":"name","data_type":"varchar","not_null":false,"unique":false},{"columnName":"dbid","data_type":"smallint","not_null":false,"unique":false},{"columnName":"status","data_type":"smallint","not_null":false,"unique":false},{"columnName":"version","data_type":"smallint","not_null":false,"unique":false}],"primary_key":null,"indexes":null,"relationships":null},{"tableName":"spt_fallback_dev","columns":[{"columnName":"xserver_name","data_type":"varchar","not_null":false,"unique":false},{"columnName":"xdttm_ins","data_type":"datetime","not_null":false,"unique":false},{"columnName":"xdttm_last_ins_upd","data_type":"datetime","not_null":false,"unique":false},{"columnName":"xfallback_low","data_type":"int","not_null":false,"unique":false},{"columnName":"xfallback_drive","data_type":"char","not_null":false,"unique":false},{"columnName":"low","data_type":"int","not_null":false,"unique":false},{"columnName":"high","data_type":"int","not_null":false,"unique":false},{"columnName":"status","data_type":"smallint","not_null":false,"unique":false},{"columnName":"name","data_type":"varchar","not_null":false,"unique":false},{"columnName":"phyname","data_type":"varchar","not_null":false,"unique":false}],"primary_key":null,"indexes":null,"relationships":null},{"tableName":"spt_fallback_usg","columns":[{"columnName":"xserver_name","data_type":"varchar","not_null":false,"unique":false},{"columnName":"xdttm_ins","data_type":"datetime","not_null":false,"unique":false},{"columnName":"xdttm_last_ins_upd","data_type":"datetime","not_null":false,"unique":false},{"columnName":"xfallback_vstart","data_type":"int","not_null":false,"unique":false},{"columnName":"dbid","data_type":"smallint","not_null":false,"unique":false},{"columnName":"segmap","data_type":"int","not_null":false,"unique":false},{"columnName":"lstart","data_type":"int","not_null":false,"unique":false},{"columnName":"sizepg","data_type":"int","not_null":false,"unique":false},{"columnName":"vstart","data_type":"int","not_null":false,"unique":false}],"primary_key":null,"indexes":null,"relationships":null},{"tableName":"table1","columns":[{"columnName":"id","data_type":"int","not_null":false,"unique":true},{"columnName":"name","data_type":"varchar","not_null":false,"unique":false}],"primary_key":["id"],"indexes":null,"relationships":null},{"tableName":"table2","columns":[{"columnName":"id","data_type":"int","not_null":false,"unique":true},{"columnName":"description","data_type":"varchar","not_null":false,"unique":false},{"columnName":"table1_id","data_type":"int","not_null":false,"unique":false}],"primary_key":["id"],"indexes":null,"relationships":[{"Conname":"FK__table2__table1_i__22CA2527","RelatedTableName":"table1"}]},{"tableName":"table3","columns":[{"columnName":"id","data_type":"int","not_null":false,"unique":true},{"columnName":"info","data_type":"varchar","not_null":false,"unique":false}],"primary_key":["id"],"indexes":null,"relationships":null},{"tableName":"spt_monitor","columns":[{"columnName":"lastrun","data_type":"datetime","not_null":false,"unique":false},{"columnName":"cpu_busy","data_type":"int","not_null":false,"unique":false},{"columnName":"io_busy","data_type":"int","not_null":false,"unique":false},{"columnName":"idle","data_type":"int","not_null":false,"unique":false},{"columnName":"pack_received","data_type":"int","not_null":false,"unique":false},{"columnName":"pack_sent","data_type":"int","not_null":false,"unique":false},{"columnName":"connections","data_type":"int","not_null":false,"unique":false},{"columnName":"pack_errors","data_type":"int","not_null":false,"unique":false},{"columnName":"total_read","data_type":"int","not_null":false,"unique":false},{"columnName":"total_write","data_type":"int","not_null":false,"unique":false},{"columnName":"total_errors","data_type":"int","not_null":false,"unique":false}],"primary_key":null,"indexes":null,"relationships":null},{"tableName":"MSreplication_options","columns":[{"columnName":"optname","data_type":"sysname","not_null":false,"unique":false},{"columnName":"value","data_type":"bit","not_null":false,"unique":false},{"columnName":"major_version","data_type":"int","not_null":false,"unique":false},{"columnName":"minor_version","data_type":"int","not_null":false,"unique":false},{"columnName":"revision","data_type":"int","not_null":false,"unique":false},{"columnName":"install_failures","data_type":"int","not_null":false,"unique":false}],"primary_key":null,"indexes":null,"relationships":null}]`
 
 func createTestPostgresSchema(db *gorm.DB) error {
 	schema := `
@@ -74,11 +74,6 @@ func createTestMySQLSchema(db *gorm.DB) error {
 
 func createTestSQLServerSchema(db *gorm.DB) error {
 	schema := `
-	IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'testdb')
-	BEGIN
-		CREATE DATABASE testdb;
-		USE testdb;
-	END
 	CREATE TABLE table1 (
 		id INT IDENTITY PRIMARY KEY,
 		name VARCHAR(255)
@@ -104,6 +99,9 @@ type DBContainerConfig struct {
 	ExposedPort string
 	Env         map[string]string
 	InternalDB  string
+	WaitingFor  func(exposedPort nat.Port) wait.Strategy
+	Mounts      []testcontainers.ContainerMount
+	Cmd         []string
 }
 
 func startDBContainer(t *testing.T, config DBContainerConfig) (*testcontainers.Container, string, string, string, string, string, string) {
@@ -121,7 +119,7 @@ func startDBContainer(t *testing.T, config DBContainerConfig) (*testcontainers.C
 		Image:        config.Image,
 		ExposedPorts: []string{config.ExposedPort},
 		Env:          config.Env,
-		WaitingFor:   wait.ForListeningPort(exposedPort).WithStartupTimeout(180 * time.Second),
+		WaitingFor:   config.WaitingFor(exposedPort),
 	}
 
 	dbContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -164,6 +162,9 @@ func startPostgresContainer(t *testing.T) (*testcontainers.Container, string, st
 			"DB_USER":           "user",
 			"DB_PASSWORD":       "password",
 		},
+		WaitingFor: func(exposedPort nat.Port) wait.Strategy {
+			return wait.ForListeningPort(exposedPort).WithStartupTimeout(60 * time.Second)
+		},
 		InternalDB: "postgres",
 	}
 	return startDBContainer(t, postgresConfig)
@@ -182,6 +183,9 @@ func startMySQLContainer(t *testing.T) (*testcontainers.Container, string, strin
 			"DB_USER":             "user",
 			"DB_PASSWORD":         "password",
 		},
+		WaitingFor: func(exposedPort nat.Port) wait.Strategy {
+			return wait.ForListeningPort(exposedPort).WithStartupTimeout(60 * time.Second)
+		},
 		InternalDB: "mysql",
 	}
 	return startDBContainer(t, mysqlConfig)
@@ -189,16 +193,35 @@ func startMySQLContainer(t *testing.T) (*testcontainers.Container, string, strin
 
 func startSQLServerContainer(t *testing.T) (*testcontainers.Container, string, string, string, string, string, string) {
 	sqlServerConfig := DBContainerConfig{
-		Image:       "mcr.microsoft.com/mssql/server:2019-latest",
+		Image:       "mcr.microsoft.com/azure-sql-edge",
 		ExposedPort: "1433/tcp",
 		Env: map[string]string{
-			"ACCEPT_EULA": "Y",
-			"DB_NAME":     "testdb",
+			"ACCEPT_EULA": "1",
+			"DB_NAME":     "master",
 			"DB_USER":     "sa",
 			"SA_PASSWORD": "StrongP@ssw0rd!",
 		},
+		WaitingFor: func(exposedPort nat.Port) wait.Strategy {
+			return wait.ForLog("SQL Server is now ready for client connections").WithStartupTimeout(60 * time.Second)
+		},
 		InternalDB: "sqlserver",
+		Mounts: []testcontainers.ContainerMount{
+			{
+				Source: testcontainers.GenericBindMountSource{
+					HostPath: "../init_script.sh",
+				},
+				Target: "/var/opt/mssql/scripts/init-script.sh",
+			},
+			{
+				Source: testcontainers.GenericBindMountSource{
+					HostPath: "../init_script.sql",
+				},
+				Target: "/var/opt/mssql/scripts/mssql_init.sql",
+			},
+		},
+		Cmd: []string{"/bin/bash", "/var/opt/mssql/scripts/init-script.sh"},
 	}
+
 	return startDBContainer(t, sqlServerConfig)
 }
 
@@ -263,23 +286,13 @@ func TestDatabaseManager_SQLServer_GetTableMetadata(t *testing.T) {
 
 	dbm := DatabaseManager{}
 	db, err := dbm.Connect(sqlserverdb, host, port, database, user, password)
+	if err != nil {
+		t.Fatalf("Failed to connect: %s", err)
+	}
 	assert.NoError(t, err)
 	assert.NotNil(t, db)
 
-	// Create testdb databse
-	err = db.Exec("CREATE DATABASE testdb;").Error
-	if err != nil {
-		t.Fatalf("Failed to create database 'testdb': %s", err)
-	}
-
-	// Connection to testdb database
-	newDB, err := dbm.Connect(sqlserverdb, host, port, database, user, password)
-	if err != nil {
-		t.Fatal(err)
-	}
-	assert.NotNil(t, newDB)
-
-	err = createTestSQLServerSchema(newDB)
+	err = createTestSQLServerSchema(db)
 	assert.NoError(t, err)
 
 	metaData, err := dbm.GetTableMetadata()

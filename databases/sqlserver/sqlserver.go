@@ -12,13 +12,14 @@ import (
 type SQLServerConnector struct{}
 
 func (conn SQLServerConnector) Connect(host, port, database, user, password string) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s", user, password, host, port, database)
+	dsn := fmt.Sprintf(`sqlserver://%s:%s@%s:%s?database=%s`, user, password, host, port, database)
 
 	db, err := gorm.Open(sqlserver.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Println("sqlserver.go:[1]", err)
+		log.Println("sqlserver.go:[1] Connection failed:", err)
 		return nil, err
 	}
+
 	return db, nil
 }
 
@@ -36,13 +37,24 @@ func (conn SQLServerConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.Table
 		// Get columns
 		var columns []*dbstructs.Column
 		result := db.Raw(`
-				SELECT c.name AS column_name, t.name AS data_type, 
-				c.is_nullable = 0 AS not_null,
-				CASE WHEN ic.index_column_id IS NOT NULL THEN 1 ELSE 0 END AS is_unique
-				FROM sys.columns c
-				INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
-				LEFT JOIN sys.index_columns ic ON ic.object_id = c.object_id AND ic.column_id = c.column_id
-				WHERE c.object_id = OBJECT_ID(?)`, tableName).Scan(&columns)
+		SELECT 
+				c.name AS column_name, 
+				t.name AS data_type, 
+				c.is_nullable,
+				CASE 
+						WHEN ic.index_id IS NOT NULL AND i.is_unique = 1 THEN 1 
+						ELSE 0 
+				END AS is_unique
+		FROM 
+				sys.columns c
+		INNER JOIN 
+				sys.types t ON c.user_type_id = t.user_type_id
+		LEFT JOIN 
+				sys.index_columns ic ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+		LEFT JOIN 
+				sys.indexes i ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+		WHERE 
+				c.object_id = OBJECT_ID(?);`, tableName).Scan(&columns)
 		if result.Error != nil {
 			log.Println("sqlserver.go:[2]", result.Error)
 			return nil, result.Error
@@ -106,17 +118,19 @@ func (conn SQLServerConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.Table
 func (conn SQLServerConnector) GetIndexes(db *gorm.DB, tableName string) ([]*dbstructs.Index, error) {
 	var indexes []*dbstructs.Index
 	rows, err := db.Raw(`
-			SELECT 
-				i.name AS index_name, 
-				COLUMN_NAME(ic.object_id, ic.column_id) AS column_name
-			FROM 
-				sys.indexes i
-			INNER JOIN 
-				sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
-			WHERE 
-				i.object_id = OBJECT_ID(?) AND i.is_primary_key = 0
-			ORDER BY 
-				i.name, ic.key_ordinal`, tableName).Rows()
+		SELECT 
+			i.name AS index_name, 
+			c.name AS column_name
+		FROM 
+			sys.indexes i
+		INNER JOIN 
+			sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+		INNER JOIN 
+			sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+		WHERE 
+			i.object_id = OBJECT_ID(?) AND i.is_primary_key = 0
+		ORDER BY 
+			i.name, ic.key_ordinal;`, tableName).Rows()
 	if err != nil {
 		return nil, err
 	}
