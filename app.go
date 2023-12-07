@@ -51,7 +51,7 @@ func (a *App) ConfigureGorm(dbType, host, port, database, user, password string)
 }
 
 func (a *App) GetTablesList() []*dbstructs.TableMetadata {
-	tables := databases.GetDatabaseManagerInstance().Tables
+	tables := databases.GetDatabaseManagerInstance().GetTablesList()
 	return tables
 }
 

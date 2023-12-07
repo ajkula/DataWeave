@@ -27,24 +27,50 @@ type DatabaseManager struct {
 	Edges     []*dbstructs.RelationshipEdge
 }
 
-func GetDatabaseManagerInstance() *DatabaseManager {
+/* func GetDatabaseManagerInstance() *DatabaseManager {
 	once.Do(func() {
 		instance = &DatabaseManager{}
 	})
 	return instance
+} */
+
+func GetDatabaseManagerInstance() *DatabaseManager {
+	if instance == nil {
+		instance = &DatabaseManager{}
+	}
+	return instance
+}
+
+func SetInstance(mockInstance *DatabaseManager) {
+	instance = mockInstance
+}
+
+func (dbm *DatabaseManager) SetConnector(con DatabaseConnector) {
+	dbm.connector = con
+}
+
+func (dbm *DatabaseManager) GetTablesList() []*dbstructs.TableMetadata {
+	return dbm.Tables
+}
+
+// GetTablesListFunc is a function variable to get table metadata.
+var GetTablesListFunc = DefaultGetTablesList
+
+func DefaultGetTablesList() []*dbstructs.TableMetadata {
+	return GetDatabaseManagerInstance().GetTablesList()
 }
 
 func (dbm *DatabaseManager) Connect(dbType, host, port, database, user, password string) (*gorm.DB, error) {
 	log.Println("Trying to connect to DB...")
 	switch dbType {
 	case "postgres":
-		dbm.connector = &postgresConnector.PostgresConnector{}
+		dbm.SetConnector(&postgresConnector.PostgresConnector{})
 	case "mysql":
-		dbm.connector = &mysqlConnector.MySQLConnector{}
+		dbm.SetConnector(&mysqlConnector.MySQLConnector{})
 	case "sqlite":
-		dbm.connector = &sqliteConnector.SQLiteConnector{}
+		dbm.SetConnector(&sqliteConnector.SQLiteConnector{})
 	case "sqlserver":
-		dbm.connector = &sqlserverConnector.SQLServerConnector{}
+		dbm.SetConnector(&sqlserverConnector.SQLServerConnector{})
 	default:
 		return nil, errors.New("unsopported database")
 	}
