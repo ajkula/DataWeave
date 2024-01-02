@@ -43,46 +43,46 @@ Project files structure :
 
 ```javascript
 db_meta/
-    +- main.go
-    +- app.go                       // Exports Go<->JS bindings
-    +-- frontend/
-    |   +-- package.json
-    |   +-- index.html
-    |   +-- src/
-    |       +-- app.css
-    |       +-- main.js             // App router, DM updates trigger vars inject
-    |       +-- style.css
-    |       +-- utils/
-    |           +-- utils.js        // JS toolbox
-    |       +-- pages/
-    |           +-- connection/     // DB connection form
-    |               +-- script.js   // Module logic
-    |               +-- styles.css  // Module styles
-    |           +-- nav/            // Nav menu using the custom router
-    |               +-- script.js   
-    |               +-- styles.css  
-    |           +-- graph/          // Displays the Tables and relations
-    |               +-- script.js   
-    |               +-- styles.css  
-    |           +-- integrity/      // Schema integrity checks page
-    |               +-- script.js   
-    |               +-- styles.css  
-    |           +-- other pages soon...
-    +-- databases/
-    |   +-- database_connector.go   // RGBDS Interface to abstract connectors
-    |   +-- database_manager.go     // Concrete implementation
-    |   +-- dbstructs/
-    |       +-- dbstructs.go        // Structs package
-    |   +-- postgres/
-    |       +-- postgres.go         // PostgreSQL connector
-    |   +-- mysql/
-    |       +-- mysql.go            // MySQL connector
-    |   +-- sqlite/
-    |       +-- sqlite.go           // SQLite connector
-    |   +-- sqlserver/
-    |       +-- sqlserver.go        // SQL Server connector
-    +-- lang/
-        +-- translations.go         // Translations package (todo)
+├── main.go
+├── app.go                       // Exports Go<->JS bindings
+├── frontend/
+│   ├── package.json
+│   ├── index.html
+│   └── src/
+│       ├── app.css
+│       ├── main.js             // App router, DM updates trigger vars inject
+│       ├── style.css
+│       ├── utils/
+│       │   └── utils.js        // JS toolbox
+│       └── pages/
+│           ├── connection/     // DB connection form
+│           │   ├── script.js   // Module logic
+│           │   └── styles.css  // Module styles
+│           ├── nav/            // Nav menu using the custom router
+│           │   ├── script.js   
+│           │   └── styles.css  
+│           ├── graph/          // Displays the Tables and relations
+│           │   ├── script.js   
+│           │   └── styles.css  
+│           ├── integrity/      // Schema integrity checks page
+│           │   ├── script.js   
+│           │   └── styles.css  
+│           └── other pages soon...
+├── databases/
+│   ├── database_connector.go   // RGBDS Interface to abstract connectors
+│   ├── database_manager.go     // Concrete implementation
+│   ├── dbstructs/
+│   │   └── dbstructs.go        // Structs package
+│   ├── postgres/
+│   │   └── postgres.go         // PostgreSQL connector
+│   ├── mysql/
+│   │   └── mysql.go            // MySQL connector
+│   ├── sqlite/
+│   │   └── sqlite.go           // SQLite connector
+│   └── sqlserver/
+│       └── sqlserver.go        // SQL Server connector
+└── lang/
+    └── translations.go         // Translations package (todo)
 ```
 
 ## Tests

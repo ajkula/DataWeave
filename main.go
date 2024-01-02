@@ -42,8 +42,6 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 
-	fmt.Println("System Language:", getSystemLanguage())
-
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "db_meta",
