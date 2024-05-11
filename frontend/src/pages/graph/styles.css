@@ -10,3 +10,9 @@ svg {
   width: 95%;
   height: 85%;
 }
+
+.link {
+  stroke: #ff0000; /* Couleur rouge pour une visibilité élevée */
+  stroke-width: 2px; /* Augmenter l'épaisseur pour mieux voir les lignes */
+  stroke-opacity: 0.8; /* Légère transparence */
+}

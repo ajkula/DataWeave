@@ -89,6 +89,8 @@ func transposeGraph(originalGraph *dbstructs.GraphResponse) *dbstructs.GraphResp
 		}
 		transposedGraph.Edges = append(transposedGraph.Edges, transposedEdge)
 	}
+	log.Println("Original edges:", originalGraph.Edges)
+	log.Println("Transposed edges:", transposedGraph.Edges)
 
 	return transposedGraph
 }
@@ -99,6 +101,7 @@ func findNodeByName(nodeName string, graph *dbstructs.GraphResponse) *dbstructs.
 			return node
 		}
 	}
+
 	return nil
 }
 
@@ -108,5 +111,6 @@ func findNodeData(nodeId string, graph *dbstructs.GraphResponse) *dbstructs.Node
 			return node.Data
 		}
 	}
+
 	return nil
 }

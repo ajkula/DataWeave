@@ -9,14 +9,13 @@ import (
 	"errors"
 	"log"
 	"strconv"
-	"sync"
 
 	"gorm.io/gorm"
 )
 
 var (
 	instance *DatabaseManager
-	once     sync.Once
+	// once     sync.Once
 )
 
 type DatabaseManager struct {
@@ -27,12 +26,12 @@ type DatabaseManager struct {
 	Edges     []*dbstructs.RelationshipEdge
 }
 
-/* func GetDatabaseManagerInstance() *DatabaseManager {
-	once.Do(func() {
-		instance = &DatabaseManager{}
-	})
-	return instance
-} */
+// func GetDatabaseManagerInstance() *DatabaseManager {
+// 	once.Do(func() {
+// 		instance = &DatabaseManager{}
+// 	})
+// 	return instance
+// }
 
 func GetDatabaseManagerInstance() *DatabaseManager {
 	if instance == nil {
@@ -110,6 +109,8 @@ func (dbm *DatabaseManager) GetTableMetadata() ([]*dbstructs.TableMetadata, erro
 
 func (dbm *DatabaseManager) TransformToGraph() {
 	dbm.Nodes = []*dbstructs.NodeElement{}
+	dbm.Edges = []*dbstructs.RelationshipEdge{}
+
 	for index, table := range dbm.Tables {
 		// Add Nodes
 		dbm.Nodes = append(dbm.Nodes, &dbstructs.NodeElement{
@@ -122,13 +123,12 @@ func (dbm *DatabaseManager) TransformToGraph() {
 			},
 		})
 
-		dbm.Edges = []*dbstructs.RelationshipEdge{}
 		// Add relations
 		for _, rel := range table.Relationships {
 			dbm.Edges = append(dbm.Edges, &dbstructs.RelationshipEdge{
 				Data: &dbstructs.EdgeData{
 					ID:     rel.Conname,
-					Source: table.TableName,
+					Source: rel.SourceTableName,
 					Target: rel.RelatedTableName,
 				},
 			})

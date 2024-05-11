@@ -83,13 +83,28 @@ func (conn PostgresConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableM
 
 		// Get relationships
 		var relationships []*dbstructs.RelationshipMetadata
-		result = db.Raw(`
-				SELECT conname, confrelid::regclass 
-				FROM pg_constraint 
-				WHERE confrelid = (SELECT oid FROM pg_class WHERE relname = ?)`, table.TableName).Scan(&relationships)
-		if result.Error != nil {
-			log.Println("postgres.go:[5]", result.Error)
-			return nil, result.Error
+		err = db.Raw(`
+				SELECT
+						con.conname AS conname,
+						tbl.relname AS source_table,
+						rel_tbl.relname AS related_table_name
+				FROM
+						pg_constraint con
+						INNER JOIN pg_class tbl ON con.conrelid = tbl.oid
+						INNER JOIN pg_class rel_tbl ON con.confrelid = rel_tbl.oid
+				WHERE
+						con.contype = 'f'
+						AND (tbl.relname = ? OR rel_tbl.relname = ?)
+						AND tbl.relname != rel_tbl.relname
+		`, table.TableName, table.TableName).Scan(&relationships).Error
+
+		if err != nil {
+			log.Printf("Error fetching relationships for table %s: %v", table.TableName, err)
+			return nil, err
+		}
+
+		for _, rel := range relationships {
+			log.Printf("Foreign key: %s, Source table: %s, Target table: %s", rel.Conname, rel.SourceTableName, rel.RelatedTableName)
 		}
 		table.Relationships = relationships
 

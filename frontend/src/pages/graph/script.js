@@ -17,32 +17,45 @@ export async function init(data) {
   const res = await GraphTransform();
   const graph = JSON.parse(res);
 
-  const svgElement = d3.select("#svg").node();
+  console.log({res})
+  console.log({graph})
+
+  graph.edges.forEach(edge => {
+    if (!graph.nodes.find(node => node.data.name === edge.data.source || node.data.name === edge.data.target)) {
+      console.error('Missing node for edge:', edge);
+    }
+  });
+
+  graph.edges.forEach(edge => {
+    edge.source = graph.nodes.find(node => node.data.name === edge.data.source).data.name;
+    edge.target = graph.nodes.find(node => node.data.name === edge.data.target).data.name;
+  });
+
+  const svgElement = d3.select("#svg").attr('width', '100%').attr('height', '100%').node();
   const container = svgElement.parentNode;
 
   // getBoundingClientRect pour les dimensions réelles
   const { width, height } = container.getBoundingClientRect();
 
   // Créer l'élément SVG
-  const svg = d3.select("#svg")
-    //  .attr("width", width)
-    //  .attr("height", height)
-    .call(d3.zoom().on("zoom", function (event) {
-      svg.attr("transform", event.transform);
-    }))
-    .append("g");
+  const svg = d3.select(svgElement)
+  .call(d3.zoom().on("zoom", ({ transform }) => svg.attr("transform", transform)))
+  .append("g");
 
   // Créer la simulation de force
   const simulation = d3.forceSimulation(graph.nodes)
-    .force("link", d3.forceLink(graph.edges).id(d => d.data.id))
-    .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(width / 4, height / 4));
+  .force("link", d3.forceLink(graph.edges).id(d => d.data.name)
+    .distance(400)) // Augmenter la distance des liens
+  .force("charge", d3.forceManyBody().strength(-200)) // Augmenter la répulsion
+  .force("center", d3.forceCenter(width / 2, height / 2))
+  .force("collide", d3.forceCollide(30));
 
   // Créer les liens
   const link = svg.selectAll(".link")
     .data(graph.edges)
     .enter().append("line")
-    .attr("class", "link");
+    .attr("class", "link")
+    .attr("marker-end", "url(#end)");
 
   // Créer les nœuds
   const node = svg.selectAll(".node")
@@ -52,27 +65,61 @@ export async function init(data) {
 
   // Ajouter des rectangles pour représenter les cartes
   node.append("rect")
-    .attr("width", 120)
+  //  .attr("width", calculateNodeWidth)
     .attr("height", d => 20 + d.data.columns.length * 15 + 10)
     .attr("fill", "#fff")
     .attr("stroke", "#999");
 
   // Ajouter des titres aux cartes
   node.append("text")
-    .attr("x", 60)
+  //  .attr("x", 60)
     .attr("y", 15)
     .attr("text-anchor", "middle")
     .text(d => d.data.name)
     .style("font-weight", "bold");
 
   // Ajouter les noms des colonnes
-  node.selectAll(".column")
-    .data(d => d.data.columns)
-    .enter().append("text")
-    .attr("x", 10)
-    .attr("y", (d, i) => 35 + i * 15)
-    .text(d => d.columnName)
-    .style("color", "black");
+node.each(function(d) {
+  const g = d3.select(this);
+  d.data.columns.forEach((col, i) => {
+    g.append("text")
+      .attr("x", 10) // Position initiale pour les colonnes
+      .attr("y", 35 + i * 15)
+      .text(col.columnName)
+      .style("font-size", "12px")
+      .attr("text-anchor", "start"); // Aligner le texte à gauche
+  });
+});
+
+  node.each(function(d) {
+    const texts = d3.select(this).selectAll("text"); // Sélectionner tous les textes du nœud
+    let maxWidth = 0;
+  
+    texts.each(function() {
+      const textWidth = this.getComputedTextLength();
+      if (textWidth > maxWidth) {
+        maxWidth = textWidth;
+      }
+    });
+  
+    const padding = 20;
+    const rectWidth = maxWidth + padding; // Ajouter le padding pour la largeur
+  
+    // Mettre à jour le rectangle pour avoir la largeur calculée
+    d3.select(this).select("rect")
+      .attr("width", rectWidth)
+      .attr("x", -rectWidth / 2); // Centre le rectangle autour de l'origine du groupe
+  
+    // Mettre à jour la position x du texte du nom de la table pour le centrer
+    d3.select(this).select("text").attr("x", 0);
+  
+    // Mettre à jour la position x des textes des colonnes
+    d3.select(this).selectAll("text").each(function(d, i) {
+      if (i > 0) { // Ignorer le premier texte (nom de la table)
+        d3.select(this).attr("x", -rectWidth / 2 + 10); // Aligner à la bordure gauche du rectangle
+      }
+    });
+  });
 
   function dragNode(simulation) {
     function dragstarted(event, d) {
@@ -121,7 +168,8 @@ export async function init(data) {
     .attr("markerHeight", 6)
     .attr("orient", "auto")
     .append("path")
-    .attr("d", "M0,-5L10,0L0,5");
+    .attr("d", "M0,-5L10,0L0,5")
+    .attr("fill", "#ff0000");
 
   // Créer les liens avec les flèches
   link
@@ -139,6 +187,8 @@ export async function init(data) {
 
   // Démarrer la simulation
   simulation.restart();
+
+  console.log(graph);
 }
 
 // As of now, simply returns the key/val pairs

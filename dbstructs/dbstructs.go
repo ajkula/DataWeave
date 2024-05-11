@@ -11,7 +11,8 @@ type Column struct {
 
 type RelationshipMetadata struct {
 	Conname          string `gorm:"column:conname"`
-	RelatedTableName string `gorm:"column:confrelid"`
+	SourceTableName  string `gorm:"column:source_table"`
+	RelatedTableName string `gorm:"column:related_table_name"`
 }
 
 type Index struct {
