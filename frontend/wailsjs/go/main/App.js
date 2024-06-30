@@ -6,6 +6,10 @@ export function ConfigureGorm(arg1, arg2, arg3, arg4, arg5, arg6) {
   return window['go']['main']['App']['ConfigureGorm'](arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
+export function GenerateOpenApi() {
+  return window['go']['main']['App']['GenerateOpenApi']();
+}
+
 export function GetTablesList() {
   return window['go']['main']['App']['GetTablesList']();
 }

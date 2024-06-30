@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"db_meta/apigen"
 	"db_meta/databases"
 	"db_meta/dbstructs"
 	"encoding/json"
@@ -81,4 +82,14 @@ func (a *App) PerformAllVerifications() (string, error) {
 		return "", err
 	}
 	return string(jsonResponse), err
+}
+
+func (a *App) GenerateOpenApi() (string, error) {
+	tables := databases.GetDatabaseManagerInstance().GetTablesList()
+	var bytesArray []byte
+	var err error
+	if bytesArray, err = apigen.GenerateOpenAPI(tables); err != nil {
+		return "", err
+	}
+	return string(bytesArray), err
 }

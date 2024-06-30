@@ -1,93 +1,93 @@
 package api
 
-import "db_meta/dbstructs"
-
-// not totally sur it's nice, gotta move ui forw and see if it still fits
-
-// EndpointDefinition represents the structure for defining an API endpoint.
-type EndpointDefinition struct {
-	Path            string
-	GET             *MethodDefinition // Pointers allow for a nil if the method is not defined
-	POST            *MethodDefinition
-	PUT             *MethodDefinition
-	PATCH           *MethodDefinition
-	DELETE          *MethodDefinition
-	Parameters      []ParameterDefinition
-	Responses       map[int]ResponseDefinition // A map with the status code as the key
-	Tags            []string
-	Security        []SecurityRequirement
-	Description     string
-	OperationId     string
-	RequestBody     *dbstructs.TableMetadata
-	QueryParameters []dbstructs.Column
+type OpenAPI struct {
+	OpenAPI    string                `yaml:"openapi"`
+	Info       Info                  `yaml:"info"`
+	Paths      map[string]PathItem   `yaml:"paths"`
+	Components Components            `yaml:"components"`
+	Security   []SecurityRequirement `yaml:"security,omitempty"`
 }
 
-// MethodDefinition defines the details of a HTTP method for an endpoint.
-type MethodDefinition struct {
-	Enabled         bool
-	Description     string
-	OperationId     string
-	RequestBody     *RequestBodyDefinition
-	QueryParameters []ParameterDefinition
-	Responses       map[int]ResponseDefinition
+type Info struct {
+	Title       string `yaml:"title"`
+	Description string `yaml:"description,omitempty"`
+	Version     string `yaml:"version"`
 }
 
-// RequestBodyDefinition represents the expected structure of a request body.
-type RequestBodyDefinition struct {
-	Description string
-	Required    bool
-	Content     map[string]MediaTypeDefinition // e.g., "application/json", "application/xml"
+type PathItem struct {
+	Get        *Operation  `yaml:"get,omitempty"`
+	Post       *Operation  `yaml:"post,omitempty"`
+	Put        *Operation  `yaml:"put,omitempty"`
+	Patch      *Operation  `yaml:"patch,omitempty"`
+	Delete     *Operation  `yaml:"delete,omitempty"`
+	Parameters []Parameter `yaml:"parameters,omitempty"`
 }
 
-// MediaTypeDefinition specifies the media type and example for a request or response body.
-type MediaTypeDefinition struct {
-	Schema  interface{}
-	Example interface{}
+type Operation struct {
+	Summary     string                `yaml:"summary"`
+	Description string                `yaml:"description,omitempty"`
+	OperationID string                `yaml:"operationId"`
+	Tags        []string              `yaml:"tags,omitempty"`
+	Parameters  []Parameter           `yaml:"parameters,omitempty"`
+	RequestBody *RequestBody          `yaml:"requestBody,omitempty"`
+	Responses   map[string]Response   `yaml:"responses"`
+	Security    []SecurityRequirement `yaml:"security,omitempty"`
 }
 
-// ParameterDefinition defines a single operation parameter.
-type ParameterDefinition struct {
-	Name        string
-	In          string // "query", "header", "path", "cookie"
-	Description string
-	Required    bool
-	Schema      interface{}
-	Example     interface{}
+type Parameter struct {
+	Name        string  `yaml:"name"`
+	In          string  `yaml:"in"`
+	Description string  `yaml:"description,omitempty"`
+	Required    bool    `yaml:"required,omitempty"`
+	Schema      *Schema `yaml:"schema"`
 }
 
-// ResponseDefinition represents the structure of a response from an API endpoint.
-type ResponseDefinition struct {
-	Description string
-	Headers     map[string]HeaderDefinition
-	Content     map[string]MediaTypeDefinition // "application/json", "application/whatever"
+type RequestBody struct {
+	Description string               `yaml:"description,omitempty"`
+	Required    bool                 `yaml:"required,omitempty"`
+	Content     map[string]MediaType `yaml:"content"`
 }
 
-// HeaderDefinition defines the expected structure of a header in a request or response.
-type HeaderDefinition struct {
-	Description string
-	Required    bool
-	Schema      interface{}
+type Response struct {
+	Description string               `yaml:"description"`
+	Headers     map[string]Header    `yaml:"headers,omitempty"`
+	Content     map[string]MediaType `yaml:"content,omitempty"`
 }
 
-// SecurityRequirement specifies the security scheme and its requirements.
-type SecurityRequirement struct {
-	Type         string // "apiKey", "http", "oauth2", "openIdConnect"
-	Scheme       string
-	BearerFormat string
-	In           string // "query", "header"
-	Name         string // Name of the header or query parameter
+type MediaType struct {
+	Schema  Schema   `yaml:"schema"`
+	Example *Example `yaml:"example,omitempty"`
 }
 
-// PaginationInfo is used to store pagination information in API responses.
-type PaginationInfo struct {
-	Page       int `json:"page"`
-	PageSize   int `json:"pageSize"`
-	TotalCount int `json:"totalCount"`
-	TotalPages int `json:"totalPages"`
+type Schema struct {
+	Type       string            `yaml:"type,omitempty"`
+	Properties map[string]Schema `yaml:"properties,omitempty"`
+	Items      *Schema           `yaml:"items,omitempty"`
+	Ref        string            `yaml:"$ref,omitempty"`
+	Required   []string          `yaml:"required,omitempty"`
 }
 
-// PagedResponse is a wrapper around table data with pagination information.
-type PagedResponse struct {
-	Data       interface{}    `json:"data"`
-	Pagination PaginationInfo `json:"pagination"`
+type Header struct {
+	Description string  `yaml:"description,omitempty"`
+	Schema      *Schema `yaml:"schema"`
+}
+
+type Components struct {
+	Schemas         map[string]Schema         `yaml:"schemas,omitempty"`
+	SecuritySchemes map[string]SecurityScheme `yaml:"securitySchemes,omitempty"`
+}
+
+type SecurityScheme struct {
+	Type         string `yaml:"type"`
+	Description  string `yaml:"description,omitempty"`
+	Name         string `yaml:"name,omitempty"`
+	In           string `yaml:"in,omitempty"`
+	Scheme       string `yaml:"scheme,omitempty"`
+	BearerFormat string `yaml:"bearerFormat,omitempty"`
+}
+
+type SecurityRequirement map[string][]string
+
+type Example struct {
+	Value interface{} `yaml:"value"`
 }
