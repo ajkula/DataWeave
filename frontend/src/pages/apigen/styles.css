@@ -1,168 +1,70 @@
-#apiColContainer {
-  position: relative;
+#apiConfigPage {
   display: flex;
+  flex-direction: column;
   height: 100vh;
-  flex-direction: column;
-  align-items: center;
 }
 
-#apiFormContainer {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap; /* Ajout de cette propriété pour permettre le retour à la ligne */
-  justify-content: flex-start; /* Aligner les éléments au début du conteneur */
-  align-items: flex-start; /* Aligner les éléments en haut */
-  gap: 10px; /* Espacement entre les cartes */
-  padding: 10px;
-  max-height: calc(100vh - 150px); /* Ajustez en fonction de la hauteur de l'en-tête et de la barre de filtres */
-  overflow-y: auto; /* Permet le défilement vertical sans afficher la barre de défilement */
-}
-
-.api-card-row {
+.configPanel {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
-  padding: 5px;
+  height: 70vh;
 }
 
-.api-card-col {
-  display: flex;
-  flex-direction: column;
-  /* padding: 5px; */
+#tablesList {
+  width: 30%;
+  overflow-y: auto;
+  border-right: 1px solid #ccc;
 }
 
-/* Controls bar */
+#endpointConfig {
+  width: 70%;
+  overflow-y: auto;
+  padding: 10px;
+}
 
-.controls {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-evenly;
+.table-item {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.table-item:hover {
   background-color: #f0f0f0;
-  width: 100%;
+}
+
+.endpoint-config {
+  margin-bottom: 20px;
   padding: 10px;
-  color: black;
-  font-weight: 600;
-}
-
-.controls label {
-  margin-right: 10px;
-}
-
-/* Form styles */
-
-.endpoint-card {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
   border-radius: 5px;
+}
+
+#previewPanel {
+  height: 30vh;
+  overflow-y: auto;
+  border-top: 1px solid #ccc;
   padding: 10px;
-  margin-bottom: 5px;
-  width: max-content;
 }
 
-.form-label {
-  display: flex;
-  margin-top: 10px;
-  margin-bottom: 5px;
+pre {
+  margin: 0;
+  white-space: pre-wrap;
 }
 
-.endpoint-header select,
-.endpoint-header input[type="text"],
-.endpoint-body select,
-.endpoint-body input[type="text"] {
-  width: 90%;
-  margin-bottom: 10px;
-  height: auto !important;
-  padding: 5px;
+select, input[type="checkbox"] {
+  margin: 5px 0;
 }
 
-.http-methods button {
-  margin-left: 5px;
-  margin-bottom: 10px;
-}
-
-.endpoint-body {
-  display: flex;
-  flex-direction: column;
-  width: max-content;
-}
-
-.show-section-btn {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  background-color: #f8f9fa;
-  border: 1px solid #ccc;
+#generateButton {
+  margin: 10px;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
   border-radius: 5px;
-  padding: 5px 10px;
-  cursor: pointer;
-  /* margin-bottom: 10px; */
 }
 
-.hidden {
-  display: none;
-}
-
-/* SWITCH related methods */
-
-.switch {
-  position: relative;
-  display: inline-block;
-  /* width of the switch, adapt translation below if changed! */
-  width: 130px;
-  height: 34px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-input:checked + .slider {
-  background-color: #2196F3;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-
-/* How far the toggle goes */
-input:checked + .slider:before {
-  -webkit-transform: translateX(95px);
-  -ms-transform: translateX(95px);
-  transform: translateX(95px);
-}
-
-/* Slider's rounded shape */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
+#generateButton:hover {
+  background-color: #45a049;
 }
