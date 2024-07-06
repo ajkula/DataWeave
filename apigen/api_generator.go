@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func GenerateOpenAPI(tables []*dbstructs.TableMetadata) ([]byte, error) {
+func GenerateOpenAPI(tables []*dbstructs.TableMetadata, config *api.APIConfig) ([]byte, error) {
 	openAPI := api.OpenAPI{
 		OpenAPI: "3.0.0",
 		Info: api.Info{
@@ -26,39 +26,44 @@ func GenerateOpenAPI(tables []*dbstructs.TableMetadata) ([]byte, error) {
 	}
 
 	for _, table := range tables {
-		generatePathsForTable(&openAPI, table)
-		generateSchemaForTable(&openAPI, table)
+		if config == nil || (*config)[strings.ToLower(table.TableName)] != nil {
+			generatePathsForTable(&openAPI, table, config)
+			generateSchemaForTable(&openAPI, table)
+		}
 	}
 
 	return yaml.Marshal(openAPI)
 }
 
-func generatePathsForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata) {
+func generatePathsForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata, config *api.APIConfig) {
 	basePath := fmt.Sprintf("/%s", strings.ToLower(table.TableName))
+	tableConfig := (*config)[strings.ToLower(table.TableName)]
 
 	// Liste/création
-	openAPI.Paths[basePath] = api.PathItem{
-		Get: &api.Operation{
-			Summary:     "List " + table.TableName,
-			OperationID: generateUniqueOperationID(table.TableName, "list"),
-			Parameters:  generateQueryParameters(table),
-			Responses:   generateStandardResponses(table, true),
-		},
-		Post: &api.Operation{
-			Summary:     "Create a new " + table.TableName,
-			OperationID: generateUniqueOperationID(table.TableName, "create"),
-			RequestBody: &api.RequestBody{
-				Required: true,
-				Content: map[string]api.MediaType{
-					"application/json": {
-						Schema: api.Schema{
-							Ref: "#/components/schemas/" + table.TableName,
+	if config == nil || (tableConfig != nil && tableConfig[basePath]["GET"].Included) {
+		openAPI.Paths[basePath] = api.PathItem{
+			Get: &api.Operation{
+				Summary:     "List " + table.TableName,
+				OperationID: generateUniqueOperationID(table.TableName, "list"),
+				Parameters:  generateQueryParameters(table, config),
+				Responses:   generateStandardResponses(table, true),
+			},
+			Post: &api.Operation{
+				Summary:     "Create a new " + table.TableName,
+				OperationID: generateUniqueOperationID(table.TableName, "create"),
+				RequestBody: &api.RequestBody{
+					Required: true,
+					Content: map[string]api.MediaType{
+						"application/json": {
+							Schema: api.Schema{
+								Ref: "#/components/schemas/" + table.TableName,
+							},
 						},
 					},
 				},
+				Responses: generateStandardResponses(table, false),
 			},
-			Responses: generateStandardResponses(table, false),
-		},
+		}
 	}
 
 	// élément spécifique
@@ -109,7 +114,7 @@ func generatePathsForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata)
 			Get: &api.Operation{
 				Summary:     fmt.Sprintf("List %s for %s", relation.RelatedTableName, table.TableName),
 				OperationID: generateUniqueOperationID(table.TableName, "listRelated"+relation.RelatedTableName),
-				Parameters:  append([]api.Parameter{idParam}, generateQueryParameters(table)...),
+				Parameters:  append([]api.Parameter{idParam}, generateQueryParameters(table, config)...),
 				Responses:   generateStandardResponses(table, true),
 			},
 		}
@@ -120,7 +125,7 @@ func generateUniqueOperationID(tableName, operation string) string {
 	return fmt.Sprintf("%s_%s_%s", operation, strings.ToLower(tableName), uuid.New().String())
 }
 
-func generateQueryParameters(table *dbstructs.TableMetadata) []api.Parameter {
+func generateQueryParameters(table *dbstructs.TableMetadata, config *api.APIConfig) []api.Parameter {
 	params := []api.Parameter{
 		{
 			Name:   "page",
@@ -134,34 +139,18 @@ func generateQueryParameters(table *dbstructs.TableMetadata) []api.Parameter {
 		},
 	}
 
+	tableConfig := (*config)[strings.ToLower(table.TableName)]
+	basePath := fmt.Sprintf("/%s", strings.ToLower(table.TableName))
+
 	for _, column := range table.Columns {
 		if column.Unique {
-			params = append(params, api.Parameter{
-				Name:        column.ColumnName,
-				In:          "query",
-				Description: fmt.Sprintf("Filter by %s", column.ColumnName),
-				Schema:      &api.Schema{Type: mapSQLTypeToJSONType(column.DataType)},
-			})
-		}
-	}
-
-	return params
-}
-
-func generatePathParameters(table *dbstructs.TableMetadata) []api.Parameter {
-	params := []api.Parameter{}
-
-	for _, pkColumn := range table.PrimaryKey {
-		for _, column := range table.Columns {
-			if column.ColumnName == pkColumn {
+			if config == nil || tableConfig[basePath]["GET"].Filters[column.ColumnName] {
 				params = append(params, api.Parameter{
-					Name:        pkColumn,
-					In:          "path",
-					Required:    true,
-					Description: fmt.Sprintf("%s of the %s", pkColumn, table.TableName),
+					Name:        column.ColumnName,
+					In:          "query",
+					Description: fmt.Sprintf("Filter by %s", column.ColumnName),
 					Schema:      &api.Schema{Type: mapSQLTypeToJSONType(column.DataType)},
 				})
-				break
 			}
 		}
 	}

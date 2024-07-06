@@ -91,3 +91,16 @@ type SecurityRequirement map[string][]string
 type Example struct {
 	Value interface{} `yaml:"value"`
 }
+
+// params structs
+type APIConfig map[string]TableConfig
+
+type TableConfig map[string]EndpointConfig
+
+type EndpointConfig map[string]MethodConfig
+
+type MethodConfig struct {
+	Included bool            `json:"included"`
+	Security string          `json:"security"`
+	Filters  map[string]bool `json:"filters,omitempty"`
+}

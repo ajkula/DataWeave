@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"db_meta/api"
 	"db_meta/apigen"
 	"db_meta/databases"
 	"db_meta/dbstructs"
@@ -84,11 +85,11 @@ func (a *App) PerformAllVerifications() (string, error) {
 	return string(jsonResponse), err
 }
 
-func (a *App) GenerateOpenApi() (string, error) {
+func (a *App) GenerateOpenApi(config *api.APIConfig) (string, error) {
 	tables := databases.GetDatabaseManagerInstance().GetTablesList()
 	var bytesArray []byte
 	var err error
-	if bytesArray, err = apigen.GenerateOpenAPI(tables); err != nil {
+	if bytesArray, err = apigen.GenerateOpenAPI(tables, config); err != nil {
 		return "", err
 	}
 	return string(bytesArray), err
