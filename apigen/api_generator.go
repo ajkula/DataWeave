@@ -44,22 +44,17 @@ func generatePathsForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata,
 
 	// List/creation
 	if config == nil || (tableConfig != nil && tableConfig[basePath]["GET"].Included) {
-		methodConfig := api.MethodConfig{}
-		if tableConfig != nil {
-			methodConfig = tableConfig[basePath]["GET"]
-		}
+		GETMethodConfig := getMethodConfig(tableConfig, basePath, "GET")
 		getOperation := &api.Operation{
 			Summary:     "List " + table.TableName,
 			OperationID: generateUniqueOperationID(table.TableName, "list"),
 			Parameters:  generateQueryParameters(table, config),
-			Responses:   generateStandardResponses(table, true, methodConfig),
+			Responses:   generateStandardResponses(table, true, GETMethodConfig),
 		}
-		addRequestHeaders(getOperation, methodConfig)
+		addRequestHeaders(getOperation, GETMethodConfig)
 
-		methodConfig = api.MethodConfig{}
-		if tableConfig != nil {
-			methodConfig = tableConfig[basePath]["POST"]
-		}
+		// for futur update, UI needs to be thought about..
+		//	postMethodConfig := getMethodConfig(tableConfig, basePath, "POST")
 		postOperation := &api.Operation{
 			Summary:     "Create a new " + table.TableName,
 			OperationID: generateUniqueOperationID(table.TableName, "create"),
@@ -73,9 +68,9 @@ func generatePathsForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata,
 					},
 				},
 			},
-			Responses: generateStandardResponses(table, false, methodConfig),
+			Responses: generateStandardResponses(table, false, GETMethodConfig),
 		}
-		addRequestHeaders(postOperation, methodConfig)
+		addRequestHeaders(postOperation, GETMethodConfig)
 
 		openAPI.Paths[basePath] = api.PathItem{
 			Get:  getOperation,
@@ -92,22 +87,16 @@ func generatePathsForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata,
 			Schema:      &api.Schema{Type: "string"},
 		}
 
-		methodConfig = api.MethodConfig{}
-		if tableConfig != nil {
-			methodConfig = tableConfig[itemPath]["GET"]
-		}
+		//	getSpecificMethodConfig := getMethodConfig(tableConfig, itemPath, "GET")
 		getSpecificOperation := &api.Operation{
 			Summary:     "Get a specific " + table.TableName,
 			OperationID: generateUniqueOperationID(table.TableName, "get"),
 			Parameters:  []api.Parameter{idParam},
-			Responses:   generateStandardResponses(table, false, methodConfig),
+			Responses:   generateStandardResponses(table, false, GETMethodConfig),
 		}
-		addRequestHeaders(getSpecificOperation, methodConfig)
+		addRequestHeaders(getSpecificOperation, GETMethodConfig)
 
-		methodConfig = api.MethodConfig{}
-		if tableConfig != nil {
-			methodConfig = tableConfig[itemPath]["PUT"]
-		}
+		putMethodConfig := getMethodConfig(tableConfig, itemPath, "PUT")
 		putOperation := &api.Operation{
 			Summary:     "Update a " + table.TableName,
 			OperationID: generateUniqueOperationID(table.TableName, "update"),
@@ -122,21 +111,18 @@ func generatePathsForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata,
 					},
 				},
 			},
-			Responses: generateStandardResponses(table, false, methodConfig),
+			Responses: generateStandardResponses(table, false, putMethodConfig),
 		}
-		addRequestHeaders(putOperation, methodConfig)
+		addRequestHeaders(putOperation, putMethodConfig)
 
-		methodConfig = api.MethodConfig{}
-		if tableConfig != nil {
-			methodConfig = tableConfig[itemPath]["DELETE"]
-		}
+		//	deleteMethodConfig := getMethodConfig(tableConfig, itemPath, "DELETE")
 		deleteOperation := &api.Operation{
 			Summary:     "Delete a " + table.TableName,
 			OperationID: generateUniqueOperationID(table.TableName, "delete"),
 			Parameters:  []api.Parameter{idParam},
-			Responses:   generateStandardResponses(table, false, methodConfig),
+			Responses:   generateStandardResponses(table, false, GETMethodConfig),
 		}
-		addRequestHeaders(deleteOperation, methodConfig)
+		addRequestHeaders(deleteOperation, GETMethodConfig)
 
 		openAPI.Paths[itemPath] = api.PathItem{
 			Get:    getSpecificOperation,
@@ -148,23 +134,31 @@ func generatePathsForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata,
 		for _, relation := range table.Relationships {
 			relatedPath := fmt.Sprintf("%s/{id}/%s", basePath, strings.ToLower(relation.RelatedTableName))
 
-			methodConfig = api.MethodConfig{}
-			if tableConfig != nil {
-				methodConfig = tableConfig[relatedPath]["GET"]
-			}
+			//	relatedMethodConfig := getMethodConfig(tableConfig, relatedPath, "GET")
 			relatedOperation := &api.Operation{
 				Summary:     fmt.Sprintf("List %s for %s", relation.RelatedTableName, table.TableName),
 				OperationID: generateUniqueOperationID(table.TableName, "listRelated"+relation.RelatedTableName),
 				Parameters:  append([]api.Parameter{idParam}, generateQueryParameters(table, config)...),
-				Responses:   generateStandardResponses(table, true, methodConfig),
+				Responses:   generateStandardResponses(table, true, GETMethodConfig),
 			}
-			addRequestHeaders(relatedOperation, methodConfig)
+			addRequestHeaders(relatedOperation, GETMethodConfig)
 
 			openAPI.Paths[relatedPath] = api.PathItem{
 				Get: relatedOperation,
 			}
 		}
 	}
+}
+
+func getMethodConfig(tableConfig api.TableConfig, path string, method string) api.MethodConfig {
+	if tableConfig != nil {
+		if pathConfig, ok := tableConfig[path]; ok {
+			if methodConfig, ok := pathConfig[method]; ok {
+				return methodConfig
+			}
+		}
+	}
+	return api.MethodConfig{}
 }
 
 func addRequestHeaders(operation *api.Operation, methodConfig api.MethodConfig) {

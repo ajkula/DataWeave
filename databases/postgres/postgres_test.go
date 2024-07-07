@@ -13,22 +13,22 @@ import (
 
 func createTestSchema(db *gorm.DB) error {
 	schema := `
-	CREATE TABLE IF NOT EXISTS table1 (
-			id SERIAL PRIMARY KEY,
-			name VARCHAR(255)
-	);
+  CREATE TABLE IF NOT EXISTS table1 (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255)
+  );
 
-	CREATE TABLE IF NOT EXISTS table2 (
-			id SERIAL PRIMARY KEY,
-			description VARCHAR(255),
-			table1_id INT,
-			FOREIGN KEY (table1_id) REFERENCES table1(id)
-	);
+  CREATE TABLE IF NOT EXISTS table2 (
+      id SERIAL PRIMARY KEY,
+      description VARCHAR(255),
+      table1_id INT,
+      FOREIGN KEY (table1_id) REFERENCES table1(id)
+  );
 
-	CREATE TABLE IF NOT EXISTS table3 (
-			id SERIAL PRIMARY KEY,
-			info VARCHAR(255)
-	);`
+  CREATE TABLE IF NOT EXISTS table3 (
+      id SERIAL PRIMARY KEY,
+      info VARCHAR(255)
+  );`
 
 	return db.Exec(schema).Error
 }

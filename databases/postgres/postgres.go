@@ -36,15 +36,15 @@ func (conn PostgresConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableM
 		// Get columns
 		var columns []*dbstructs.Column
 		result := db.Raw(`
-				SELECT column_name, data_type, is_nullable = 'NO' as not_null,
-				(SELECT count(*) FROM information_schema.table_constraints tc
-						JOIN information_schema.constraint_column_usage ccu
-						ON ccu.constraint_name = tc.constraint_name
-						WHERE tc.table_name = columns.table_name
-						AND tc.constraint_type = 'UNIQUE'
-						AND ccu.column_name = columns.column_name) > 0 as is_unique
-				FROM information_schema.columns
-				WHERE table_name = ?`, tableName).Scan(&columns)
+        SELECT column_name, data_type, is_nullable = 'NO' as not_null,
+        (SELECT count(*) FROM information_schema.table_constraints tc
+            JOIN information_schema.constraint_column_usage ccu
+            ON ccu.constraint_name = tc.constraint_name
+            WHERE tc.table_name = columns.table_name
+            AND tc.constraint_type = 'UNIQUE'
+            AND ccu.column_name = columns.column_name) > 0 as is_unique
+        FROM information_schema.columns
+        WHERE table_name = ?`, tableName).Scan(&columns)
 		if result.Error != nil {
 			log.Println("postgres.go:[2]", result.Error)
 			return nil, result.Error
@@ -54,16 +54,16 @@ func (conn PostgresConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableM
 		// Get primary keys
 		var primaryKeys []string
 		rows, err := db.Raw(`
-				SELECT kcu.column_name
-				FROM information_schema.table_constraints tc
-				JOIN information_schema.key_column_usage kcu
-						ON tc.constraint_name = kcu.constraint_name
-						AND tc.table_schema = kcu.table_schema
-				WHERE tc.table_name = ? 
-						AND tc.constraint_type = 'PRIMARY KEY'
-						AND tc.table_schema = 'public'
-				ORDER BY kcu.ordinal_position
-		`, tableName).Rows()
+        SELECT kcu.column_name
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu
+            ON tc.constraint_name = kcu.constraint_name
+            AND tc.table_schema = kcu.table_schema
+        WHERE tc.table_name = ? 
+            AND tc.constraint_type = 'PRIMARY KEY'
+            AND tc.table_schema = 'public'
+        ORDER BY kcu.ordinal_position
+    `, tableName).Rows()
 		if err != nil {
 			log.Println("postgres.go:[3]", err)
 			return nil, err
@@ -84,19 +84,19 @@ func (conn PostgresConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableM
 		// Get relationships
 		var relationships []*dbstructs.RelationshipMetadata
 		err = db.Raw(`
-				SELECT
-						con.conname AS conname,
-						tbl.relname AS source_table,
-						rel_tbl.relname AS related_table_name
-				FROM
-						pg_constraint con
-						INNER JOIN pg_class tbl ON con.conrelid = tbl.oid
-						INNER JOIN pg_class rel_tbl ON con.confrelid = rel_tbl.oid
-				WHERE
-						con.contype = 'f'
-						AND (tbl.relname = ? OR rel_tbl.relname = ?)
-						AND tbl.relname != rel_tbl.relname
-		`, table.TableName, table.TableName).Scan(&relationships).Error
+        SELECT
+            con.conname AS conname,
+            tbl.relname AS source_table,
+            rel_tbl.relname AS related_table_name
+        FROM
+            pg_constraint con
+            INNER JOIN pg_class tbl ON con.conrelid = tbl.oid
+            INNER JOIN pg_class rel_tbl ON con.confrelid = rel_tbl.oid
+        WHERE
+            con.contype = 'f'
+            AND (tbl.relname = ? OR rel_tbl.relname = ?)
+            AND tbl.relname != rel_tbl.relname
+    `, table.TableName, table.TableName).Scan(&relationships).Error
 
 		if err != nil {
 			log.Printf("Error fetching relationships for table %s: %v", table.TableName, err)
@@ -124,14 +124,14 @@ func (conn PostgresConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableM
 func (conn PostgresConnector) GetIndexes(db *gorm.DB, tableName string) ([]*dbstructs.Index, error) {
 	var indexes []*dbstructs.Index
 	rows, err := db.Raw(`
-			SELECT i.relname as indexname, array_agg(a.attname) AS columns
-			FROM pg_class t
-			INNER JOIN pg_index ix ON t.oid = ix.indrelid
-			INNER JOIN pg_class i ON i.oid = ix.indexrelid
-			INNER JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(ix.indkey)
-			WHERE t.relkind = 'r' AND t.relname = ? AND i.relkind = 'i'
-			GROUP BY i.relname
-	`, tableName).Rows()
+      SELECT i.relname as indexname, array_agg(a.attname) AS columns
+      FROM pg_class t
+      INNER JOIN pg_index ix ON t.oid = ix.indrelid
+      INNER JOIN pg_class i ON i.oid = ix.indexrelid
+      INNER JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(ix.indkey)
+      WHERE t.relkind = 'r' AND t.relname = ? AND i.relkind = 'i'
+      GROUP BY i.relname
+  `, tableName).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -153,9 +153,9 @@ func (conn PostgresConnector) GetIndexes(db *gorm.DB, tableName string) ([]*dbst
 func (conn PostgresConnector) GetTableNames(db *gorm.DB) ([]string, error) {
 	var tableNames []string
 	result := db.Raw(`
-			SELECT table_name
-			FROM information_schema.tables
-			WHERE table_schema = 'public'`).Scan(&tableNames)
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'public'`).Scan(&tableNames)
 	if result.Error != nil {
 		log.Println("postgres.go:[6]", result.Error)
 		return nil, result.Error

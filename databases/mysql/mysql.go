@@ -37,7 +37,7 @@ func (conn MySQLConnector) GetTableMetadata(db *gorm.DB) ([]*dbstructs.TableMeta
 		var columns []*dbstructs.Column
 		result := db.Raw(`
         SELECT 
-						COLUMN_NAME as column_name, 
+            COLUMN_NAME as column_name, 
             DATA_TYPE as data_type, 
             IS_NULLABLE = 'NO' as not_null,
             (SELECT COUNT(*) 

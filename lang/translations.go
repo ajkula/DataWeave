@@ -30,4 +30,3 @@ func getSystemLanguage() string {
 	fmt.Printf("Detected language %s is not supported. Using default language: %s\n", detectedLang, defaultLanguage)
 	return defaultLanguage
 }
-

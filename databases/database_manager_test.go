@@ -23,46 +23,46 @@ const expectedSQLServerJSON = `[{"tableName":"spt_fallback_db","columns":[{"colu
 
 func createTestPostgresSchema(db *gorm.DB) error {
 	schema := `
-	CREATE TABLE IF NOT EXISTS table1 (
-			id SERIAL PRIMARY KEY,
-			name VARCHAR(255)
-	);
+  CREATE TABLE IF NOT EXISTS table1 (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255)
+  );
 
-	CREATE TABLE IF NOT EXISTS table2 (
-			id SERIAL PRIMARY KEY,
-			description VARCHAR(255),
-			table1_id INT,
-			FOREIGN KEY (table1_id) REFERENCES table1(id)
-	);
+  CREATE TABLE IF NOT EXISTS table2 (
+      id SERIAL PRIMARY KEY,
+      description VARCHAR(255),
+      table1_id INT,
+      FOREIGN KEY (table1_id) REFERENCES table1(id)
+  );
 
-	CREATE TABLE IF NOT EXISTS table3 (
-			id SERIAL PRIMARY KEY,
-			info VARCHAR(255)
-	);`
+  CREATE TABLE IF NOT EXISTS table3 (
+      id SERIAL PRIMARY KEY,
+      info VARCHAR(255)
+  );`
 
 	return db.Exec(schema).Error
 }
 
 func createTestMySQLSchema(db *gorm.DB) error {
 	statements := []string{`
-	CREATE TABLE IF NOT EXISTS table1 (
+  CREATE TABLE IF NOT EXISTS table1 (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255)
-	);`,
+  );`,
 
 		`CREATE TABLE IF NOT EXISTS table2 (
-			id BIGINT AUTO_INCREMENT PRIMARY KEY,
-			description VARCHAR(255),
-			table1_id BIGINT
-	);`,
+      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+      description VARCHAR(255),
+      table1_id BIGINT
+  );`,
 
 		`ALTER TABLE table2
-		ADD FOREIGN KEY (table1_id) REFERENCES table1(id);`,
+    ADD FOREIGN KEY (table1_id) REFERENCES table1(id);`,
 
 		`CREATE TABLE IF NOT EXISTS table3 (
-			id BIGINT AUTO_INCREMENT PRIMARY KEY,
-			info VARCHAR(255)
-	);`}
+      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+      info VARCHAR(255)
+  );`}
 
 	for _, stmt := range statements {
 		if err := db.Exec(stmt).Error; err != nil {
@@ -74,22 +74,22 @@ func createTestMySQLSchema(db *gorm.DB) error {
 
 func createTestSQLServerSchema(db *gorm.DB) error {
 	schema := `
-	CREATE TABLE table1 (
-		id INT IDENTITY PRIMARY KEY,
-		name VARCHAR(255)
-	);
+  CREATE TABLE table1 (
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(255)
+  );
 
-	CREATE TABLE table2 (
-		id INT IDENTITY PRIMARY KEY,
-		description VARCHAR(255),
-		table1_id INT,
-		FOREIGN KEY (table1_id) REFERENCES table1(id)
-	);
+  CREATE TABLE table2 (
+    id INT IDENTITY PRIMARY KEY,
+    description VARCHAR(255),
+    table1_id INT,
+    FOREIGN KEY (table1_id) REFERENCES table1(id)
+  );
 
-	CREATE TABLE table3 (
-		id INT IDENTITY PRIMARY KEY,
-		info VARCHAR(255)
-	);`
+  CREATE TABLE table3 (
+    id INT IDENTITY PRIMARY KEY,
+    info VARCHAR(255)
+  );`
 
 	return db.Exec(schema).Error
 }
