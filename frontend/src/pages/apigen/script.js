@@ -180,6 +180,18 @@ function createEndpointConfig(table, endpoint) {
     endpointElement.appendChild(filterConfig);
   }
 
+  // Headers configuration
+  const headersConfig = document.createElement('div');
+  headersConfig.className = 'headers-config';
+  headersConfig.innerHTML = '<h4>Headers Configuration:</h4>';
+
+  const requestHeadersContainer = createHeadersSection('Request Headers', table, endpoint, 'requestHeaders');
+  const responseHeadersContainer = createHeadersSection('Response Headers', table, endpoint, 'responseHeaders');
+
+  headersConfig.appendChild(requestHeadersContainer);
+  headersConfig.appendChild(responseHeadersContainer);
+  endpointElement.appendChild(headersConfig);
+
   return endpointElement;
 }
 
@@ -189,19 +201,6 @@ function updateFilterCheckboxes(endpointElement, checked) {
     checkbox.checked = checked;
     checkbox.dispatchEvent(new Event('change'));
   });
-}
-
-function getApiConfigValue(table, endpoint, property, subProperty = null) {
-  const tableName = table.tableName.toLowerCase();
-  const config = apiConfig[tableName]?.[endpoint.path]?.[endpoint.method];
-  
-  if (!config) return null;
-  
-  if (subProperty && property === 'filters') {
-    return config.filters?.[subProperty];
-  }
-  
-  return config[property];
 }
 
 function updateApiConfig(table, endpoint, property, value) {
@@ -216,14 +215,28 @@ function updateApiConfig(table, endpoint, property, value) {
     apiConfig[tableName][endpoint.path][endpoint.method] = {};
   }
 
-  if (property === 'filters') {
-    if (!apiConfig[tableName][endpoint.path][endpoint.method].filters) {
-      apiConfig[tableName][endpoint.path][endpoint.method].filters = {};
-    }
-    Object.assign(apiConfig[tableName][endpoint.path][endpoint.method].filters, value);
-  } else {
-    apiConfig[tableName][endpoint.path][endpoint.method][property] = value;
+  const methodConfig = apiConfig[tableName][endpoint.path][endpoint.method];
+
+  switch (property) {
+    case 'filters':
+      if (!methodConfig.filters) {
+        methodConfig.filters = {};
+      }
+      Object.assign(methodConfig.filters, value);
+      break;
+    case 'requestHeaders':
+    case 'responseHeaders':
+      if (!methodConfig[property]) {
+        methodConfig[property] = {};
+      }
+      const [headerName, isChecked] = Object.entries(value)[0];
+      methodConfig[property][headerName] = isChecked;
+      break;
+    default:
+      methodConfig[property] = value;
   }
+
+  console.log('Updated apiConfig:', JSON.stringify(apiConfig, null, 2));
   renderInterface();
 }
 
@@ -242,14 +255,119 @@ function resetAllOptions() {
 
 async function generateOpenAPISpec() {
   try {
-    console.log({apiConfig});
+    console.log({ apiConfig });
     const spec = await GenerateOpenApi(apiConfig);
     const previewPanel = document.getElementById('previewPanel');
     previewPanel.innerHTML = '<pre>' + jsYaml.dump(jsYaml.load(spec)) + '</pre>';
   } catch (error) {
     console.error('Error generating OpenAPI spec:', error);
-    // Afficher un message d'erreur à l'utilisateur
+    // donot forget the "result" div
   }
+}
+
+function createHeadersSection(title, table, endpoint, headerType) {
+  const container = document.createElement('div');
+  container.className = 'headers-section';
+  container.innerHTML = `<h5>${title}</h5>`;
+
+  const headersList = getHeadersList(headerType);
+  const headersContainer = document.createElement('div');
+  headersContainer.className = 'headers-container';
+
+  headersList.forEach(header => {
+    const headerItem = document.createElement('div');
+    headerItem.className = 'header-item checkbox-container';
+    const headerCheckbox = document.createElement('input');
+    headerCheckbox.type = 'checkbox';
+    headerCheckbox.id = `${headerType}-${endpoint.method}-${endpoint.path}-${header}`;
+
+    // check if fied exists
+    const headerConfig = apiConfig[table.tableName.toLowerCase()]?.[endpoint.path]?.[endpoint.method]?.[headerType];
+    headerCheckbox.checked = headerConfig ? headerConfig[header] || false : false;
+
+    headerCheckbox.onchange = (event) => {
+      updateApiConfig(table, endpoint, headerType, {
+        [header]: event.target.checked
+      });
+      console.log(`Header ${header} changed to ${event.target.checked}`);
+    };
+
+    const headerLabel = document.createElement('label');
+    headerLabel.htmlFor = headerCheckbox.id;
+    headerLabel.textContent = header;
+    headerItem.appendChild(headerCheckbox);
+    headerItem.appendChild(headerLabel);
+    headersContainer.appendChild(headerItem);
+  });
+
+  container.appendChild(headersContainer);
+  return container;
+}
+
+function getHeadersList(headerType) {
+  const requestHeaders = [
+    'Accept',
+    'Accept-Language',
+    'Authorization',
+    'Content-Type',
+    'User-Agent',
+    'X-Request-ID',
+    'X-Correlation-ID',
+    'X-Forwarded-For',
+    'X-Forwarded-Host',
+    'If-Modified-Since',
+    'If-None-Match',
+    'Cache-Control',
+    'X-CSRF-Token',
+    'X-API-Key',
+    'X-Access-Token',
+    'X-OAuth-Scopes',
+    'X-Requested-With',
+    'Origin',
+    'Referer',
+    'Cookie',
+    'X-Device-ID',
+    'X-App-Version'
+  ];
+
+  const responseHeaders = [
+    'Content-Type',
+    'ETag',
+    'Last-Modified',
+    'Cache-Control',
+    'X-Request-ID',
+    'X-Correlation-ID',
+    'X-RateLimit-Limit',
+    'X-RateLimit-Remaining',
+    'X-RateLimit-Reset',
+    'X-Content-Type-Options',
+    'X-Frame-Options',
+    'X-XSS-Protection',
+    'Strict-Transport-Security',
+    'Access-Control-Allow-Origin',
+    'Access-Control-Allow-Methods',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Expose-Headers',
+    'Access-Control-Max-Age',
+    'X-Powered-By',
+    'X-Version',
+    'Location',
+    'Vary',
+    'WWW-Authenticate',
+    'X-CSRF-Token',
+    'Set-Cookie',
+    'X-Content-Security-Policy',
+    'Referrer-Policy',
+    'X-Download-Options',
+    'X-Permitted-Cross-Domain-Policies',
+    'Expect-CT',
+    'Feature-Policy',
+    'Public-Key-Pins',
+    'Timing-Allow-Origin',
+    'X-DNS-Prefetch-Control'
+  ];
+
+  return headerType === 'requestHeaders' ? requestHeaders : responseHeaders;
 }
 
 export async function getTranslations() {

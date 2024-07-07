@@ -37,53 +37,78 @@ func GenerateOpenAPI(tables []*dbstructs.TableMetadata, config *api.APIConfig) (
 
 func generatePathsForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata, config *api.APIConfig) {
 	basePath := fmt.Sprintf("/%s", strings.ToLower(table.TableName))
-	tableConfig := (*config)[strings.ToLower(table.TableName)]
+	var tableConfig api.TableConfig
+	if config != nil {
+		tableConfig = (*config)[strings.ToLower(table.TableName)]
+	}
 
-	// Liste/création
+	// List/creation
 	if config == nil || (tableConfig != nil && tableConfig[basePath]["GET"].Included) {
-		openAPI.Paths[basePath] = api.PathItem{
-			Get: &api.Operation{
-				Summary:     "List " + table.TableName,
-				OperationID: generateUniqueOperationID(table.TableName, "list"),
-				Parameters:  generateQueryParameters(table, config),
-				Responses:   generateStandardResponses(table, true),
-			},
-			Post: &api.Operation{
-				Summary:     "Create a new " + table.TableName,
-				OperationID: generateUniqueOperationID(table.TableName, "create"),
-				RequestBody: &api.RequestBody{
-					Required: true,
-					Content: map[string]api.MediaType{
-						"application/json": {
-							Schema: api.Schema{
-								Ref: "#/components/schemas/" + table.TableName,
-							},
+		methodConfig := api.MethodConfig{}
+		if tableConfig != nil {
+			methodConfig = tableConfig[basePath]["GET"]
+		}
+		getOperation := &api.Operation{
+			Summary:     "List " + table.TableName,
+			OperationID: generateUniqueOperationID(table.TableName, "list"),
+			Parameters:  generateQueryParameters(table, config),
+			Responses:   generateStandardResponses(table, true, methodConfig),
+		}
+		addRequestHeaders(getOperation, methodConfig)
+
+		methodConfig = api.MethodConfig{}
+		if tableConfig != nil {
+			methodConfig = tableConfig[basePath]["POST"]
+		}
+		postOperation := &api.Operation{
+			Summary:     "Create a new " + table.TableName,
+			OperationID: generateUniqueOperationID(table.TableName, "create"),
+			RequestBody: &api.RequestBody{
+				Required: true,
+				Content: map[string]api.MediaType{
+					"application/json": {
+						Schema: api.Schema{
+							Ref: "#/components/schemas/" + table.TableName,
 						},
 					},
 				},
-				Responses: generateStandardResponses(table, false),
 			},
+			Responses: generateStandardResponses(table, false, methodConfig),
 		}
-	}
+		addRequestHeaders(postOperation, methodConfig)
 
-	// élément spécifique
-	itemPath := fmt.Sprintf("%s/{id}", basePath)
-	idParam := api.Parameter{
-		Name:        "id",
-		In:          "path",
-		Required:    true,
-		Description: fmt.Sprintf("ID of the %s", table.TableName),
-		Schema:      &api.Schema{Type: "string"},
-	}
+		openAPI.Paths[basePath] = api.PathItem{
+			Get:  getOperation,
+			Post: postOperation,
+		}
 
-	openAPI.Paths[itemPath] = api.PathItem{
-		Get: &api.Operation{
+		// specific elements
+		itemPath := fmt.Sprintf("%s/{id}", basePath)
+		idParam := api.Parameter{
+			Name:        "id",
+			In:          "path",
+			Required:    true,
+			Description: fmt.Sprintf("ID of the %s", table.TableName),
+			Schema:      &api.Schema{Type: "string"},
+		}
+
+		methodConfig = api.MethodConfig{}
+		if tableConfig != nil {
+			methodConfig = tableConfig[itemPath]["GET"]
+		}
+		getSpecificOperation := &api.Operation{
 			Summary:     "Get a specific " + table.TableName,
 			OperationID: generateUniqueOperationID(table.TableName, "get"),
 			Parameters:  []api.Parameter{idParam},
-			Responses:   generateStandardResponses(table, false),
-		},
-		Put: &api.Operation{
+			Responses:   generateStandardResponses(table, false, methodConfig),
+		}
+		addRequestHeaders(getSpecificOperation, methodConfig)
+
+		methodConfig = api.MethodConfig{}
+		if tableConfig != nil {
+			methodConfig = tableConfig[itemPath]["PUT"]
+		}
+		putOperation := &api.Operation{
 			Summary:     "Update a " + table.TableName,
 			OperationID: generateUniqueOperationID(table.TableName, "update"),
 			Parameters:  []api.Parameter{idParam},
@@ -97,26 +122,64 @@ func generatePathsForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata,
 					},
 				},
 			},
-			Responses: generateStandardResponses(table, false),
-		},
-		Delete: &api.Operation{
+			Responses: generateStandardResponses(table, false, methodConfig),
+		}
+		addRequestHeaders(putOperation, methodConfig)
+
+		methodConfig = api.MethodConfig{}
+		if tableConfig != nil {
+			methodConfig = tableConfig[itemPath]["DELETE"]
+		}
+		deleteOperation := &api.Operation{
 			Summary:     "Delete a " + table.TableName,
 			OperationID: generateUniqueOperationID(table.TableName, "delete"),
 			Parameters:  []api.Parameter{idParam},
-			Responses:   generateStandardResponses(table, false),
-		},
-	}
+			Responses:   generateStandardResponses(table, false, methodConfig),
+		}
+		addRequestHeaders(deleteOperation, methodConfig)
 
-	// relations
-	for _, relation := range table.Relationships {
-		relatedPath := fmt.Sprintf("%s/{id}/%s", basePath, strings.ToLower(relation.RelatedTableName))
-		openAPI.Paths[relatedPath] = api.PathItem{
-			Get: &api.Operation{
+		openAPI.Paths[itemPath] = api.PathItem{
+			Get:    getSpecificOperation,
+			Put:    putOperation,
+			Delete: deleteOperation,
+		}
+
+		// relations
+		for _, relation := range table.Relationships {
+			relatedPath := fmt.Sprintf("%s/{id}/%s", basePath, strings.ToLower(relation.RelatedTableName))
+
+			methodConfig = api.MethodConfig{}
+			if tableConfig != nil {
+				methodConfig = tableConfig[relatedPath]["GET"]
+			}
+			relatedOperation := &api.Operation{
 				Summary:     fmt.Sprintf("List %s for %s", relation.RelatedTableName, table.TableName),
 				OperationID: generateUniqueOperationID(table.TableName, "listRelated"+relation.RelatedTableName),
 				Parameters:  append([]api.Parameter{idParam}, generateQueryParameters(table, config)...),
-				Responses:   generateStandardResponses(table, true),
-			},
+				Responses:   generateStandardResponses(table, true, methodConfig),
+			}
+			addRequestHeaders(relatedOperation, methodConfig)
+
+			openAPI.Paths[relatedPath] = api.PathItem{
+				Get: relatedOperation,
+			}
+		}
+	}
+}
+
+func addRequestHeaders(operation *api.Operation, methodConfig api.MethodConfig) {
+	if operation.Parameters == nil {
+		operation.Parameters = []api.Parameter{}
+	}
+	for header, included := range methodConfig.RequestHeaders {
+		if included {
+			operation.Parameters = append(operation.Parameters, api.Parameter{
+				Name:        header,
+				In:          "header",
+				Description: fmt.Sprintf("%s header", header),
+				Schema:      &api.Schema{Type: "string"},
+				Required:    false,
+			})
 		}
 	}
 }
@@ -158,7 +221,7 @@ func generateQueryParameters(table *dbstructs.TableMetadata, config *api.APIConf
 	return params
 }
 
-func generateStandardResponses(table *dbstructs.TableMetadata, isArray bool) map[string]api.Response {
+func generateStandardResponses(table *dbstructs.TableMetadata, isArray bool, methodConfig api.MethodConfig) map[string]api.Response {
 	var successSchema api.Schema
 	var successExample *api.Example
 
@@ -196,12 +259,13 @@ func generateStandardResponses(table *dbstructs.TableMetadata, isArray bool) map
 		successExample = &api.Example{Value: generateExampleForTable(table)}
 	}
 
-	return map[string]api.Response{
+	responses := map[string]api.Response{
 		"200": {
 			Description: "Successful response",
 			Content: map[string]api.MediaType{
 				"application/json": {Schema: successSchema, Example: successExample},
 			},
+			Headers: make(map[string]api.Header),
 		},
 		"201": {
 			Description: "Created successfully",
@@ -211,6 +275,7 @@ func generateStandardResponses(table *dbstructs.TableMetadata, isArray bool) map
 					Example: &api.Example{Value: generateExampleForTable(table)},
 				},
 			},
+			Headers: make(map[string]api.Header),
 		},
 		"400": {
 			Description: "Bad Request",
@@ -223,10 +288,24 @@ func generateStandardResponses(table *dbstructs.TableMetadata, isArray bool) map
 					Example: &api.Example{Value: map[string]string{"error": "Invalid input"}},
 				},
 			},
+			Headers: make(map[string]api.Header),
 		},
 		"404": {Description: "Not Found"},
 		"500": {Description: "Internal Server Error"},
 	}
+
+	if methodConfig.ResponseHeaders != nil {
+		for header, included := range methodConfig.ResponseHeaders {
+			if included {
+				responses["200"].Headers[header] = api.Header{
+					Description: fmt.Sprintf("%s header", header),
+					Schema:      &api.Schema{Type: "string"},
+				}
+			}
+		}
+	}
+
+	return responses
 }
 
 func generateSchemaForTable(openAPI *api.OpenAPI, table *dbstructs.TableMetadata) {

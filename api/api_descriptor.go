@@ -70,6 +70,7 @@ type Schema struct {
 type Header struct {
 	Description string  `yaml:"description,omitempty"`
 	Schema      *Schema `yaml:"schema"`
+	Required    bool    `yaml:"required,omitempty"`
 }
 
 type Components struct {
@@ -100,7 +101,9 @@ type TableConfig map[string]EndpointConfig
 type EndpointConfig map[string]MethodConfig
 
 type MethodConfig struct {
-	Included bool            `json:"included"`
-	Security string          `json:"security"`
-	Filters  map[string]bool `json:"filters,omitempty"`
+	Included        bool            `json:"included"`
+	Security        string          `json:"security"`
+	Filters         map[string]bool `json:"filters,omitempty"`
+	RequestHeaders  map[string]bool `json:"requestHeaders,omitempty"`
+	ResponseHeaders map[string]bool `json:"responseHeaders,omitempty"`
 }
