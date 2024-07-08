@@ -24,7 +24,7 @@ func GenerateOpenAPI(tables []*dbstructs.TableMetadata, config *api.APIConfig) (
 			Schemas: make(map[string]api.Schema),
 		},
 	}
-
+  
 	for _, table := range tables {
 		if config == nil || (*config)[strings.ToLower(table.TableName)] != nil {
 			generatePathsForTable(&openAPI, table, config)
