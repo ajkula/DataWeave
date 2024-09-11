@@ -186,10 +186,10 @@ func startMySQLContainer(t *testing.T) (*testcontainers.Container, string, strin
 			"DB_PASSWORD":         "password",
 		},
 		WaitingFor: func(exposedPort nat.Port) wait.Strategy {
-			return wait.ForSQL(exposedPort, "mysql", func(port nat.Port) string {
-				return fmt.Sprintf("root:rootpassword@tcp(localhost:%s)/testdb", port.Port())
-			}).WithStartupTimeout(60 * time.Second)
-		},
+    return wait.ForSQL(exposedPort, "mysql", func(host string, port nat.Port) string {
+        return fmt.Sprintf("root:rootpassword@tcp(%s:%s)/testdb", host, port.Port())
+    }).WithStartupTimeout(60 * time.Second)
+},
 		InternalDB: "mysql",
 	}
 	return startDBContainer(t, mysqlConfig)
