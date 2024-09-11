@@ -9,6 +9,16 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
     - uses: actions/checkout@v4
     
@@ -41,7 +51,14 @@ jobs:
         npm run build
     
     - name: Run tests
-      run: go test -v ./...
+      env:
+        MYSQL_HOST: 127.0.0.1
+        MYSQL_PORT: 3306
+        MYSQL_USER: root
+        MYSQL_PASSWORD: rootpassword
+        MYSQL_DATABASE: testdb
+      run: |
+        go test -v ./...
     
     - name: Build Wails app
       run: wails build
